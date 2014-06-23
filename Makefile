@@ -4,7 +4,7 @@ PROJECT_NAME := pumfreebot
 #LIB_FILES := rdf_sparql_http.mli rdf_4s.mli rdf_sparql_http.ml rdf_4s.ml
 LIB_FILES := rdf_sparql_http.mli rdf_sparql_http.ml
 # LIB_FILES := rdf_4s.mli rdf_4s.ml
-MY_FILES := youtube_http.ml freebase_http.ml bot.ml 
+MY_FILES := http_request_manager.ml youtube_http.ml freebase_http.ml bot.ml
 
 RM := rm -fv
 
