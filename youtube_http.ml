@@ -6,21 +6,30 @@
 ** PRIVATE
 *)
 
+
 (*** youtube API ***)
 (* API Key *)
 let youtube_api_key = "AIzaSyBlcjTwKF9UmOqnnExTZGgdY9nwS_0C5A8"
 
 (* item kind (API values) *)
-let search_result_item_kind = "youtube#searchResult"
-let video_item_kind = "youtube#video"
+(* let search_result_item_kind = "youtube#searchResult" *)
+(* let video_item_kind = "youtube#video" *)
 
 (*** youtube url ***)
 let youtube_base_url = "https://www.googleapis.com/youtube/v3/"
 
 (*** Url creator ***)
 let create_youtube_search_url query parts max_results =
-  youtube_base_url ^"search"
+  youtube_base_url ^ "search"
   ^ "?part=" ^ parts
+  ^ "&maxResults=" ^ max_results
+  ^ "&q=" ^ query
+  ^ "&key=" ^ youtube_api_key
+
+let create_youtube_search_url query parts max_results type_of_result =
+  youtube_base_url ^ "search"
+  ^ "?type=" ^ type_of_result
+  ^ "&part=" ^ parts
   ^ "&maxResults=" ^ max_results
   ^ "&q=" ^ query
   ^ "&key=" ^ youtube_api_key
@@ -56,31 +65,16 @@ let get_description_field json =
 let get_video_url item =
   let item_id = get_id_field item in
   let get_url_from_assoc assoc =
-    if get_kind_field assoc = video_item_kind
-    then get_videoid_field assoc
-    else "Not_a_video --> " ^ (get_kind_field assoc)
+    get_videoid_field assoc
   in
   match item_id with
   | `String s -> s
   | `Assoc a -> get_url_from_assoc item_id
   | _   -> "Unable to find url"
 
-(* a video is a tuple (title * url * description) *)
-let video_of_json json =
-  let create_video current_item =
-    let snippet = get_snippet_field current_item in
-    let url = get_video_url current_item in
-    (get_title_field snippet, url, get_description_field snippet)
-  in
-  List.map create_video (get_items_field json)
 
 
-
-(*
-** PUBLIC
-*)
-
-(*** DEBUG: Printer ***)
+(* DEBUG: Printer *)
 let print_youtube_json json =
   let print_current_item item =
     let snippet = get_snippet_field item in
@@ -92,6 +86,20 @@ let print_youtube_json json =
       ^ "-->Url:\"" ^ url ^ "\"\n"
       ^ "-->Description:\"" ^ (get_description_field snippet) ^ "\"\n") in
   List.map print_current_item (get_items_field json)
+
+
+(* a video is a tuple (title * url * description) *)
+let video_of_json json =
+  let create_video current_item =
+    let snippet = get_snippet_field current_item in
+    let url = get_video_url current_item in
+    (get_title_field snippet, url, get_description_field snippet)
+  in
+  List.map create_video (get_items_field json)
+
+(*
+** PUBLIC
+*)
 
 let print_youtube_video (title, url, description) =
   print_endline (
@@ -105,12 +113,14 @@ let print_youtube_video (title, url, description) =
 (**
 ** This function will make an http request and return a list of video as a list of tup** le (title * url * description)
 *)
-let search_video request parts max_result =
+let search_video request max_result =
   let url =
-    create_youtube_search_url request parts max_result
+    create_youtube_search_url request "snippet" max_result "video"
   in
-  lwt youtube_results = Http_request_manager.request url in
-  let youtube_json = Http_request_manager.get_json_from_http_results youtube_results in
+  lwt youtube_json = Http_request_manager.request ~display_body:false url in
   Lwt.return (video_of_json youtube_json)
 
+
+(* let get_video_by_url video_url = *)
+(*   let extract_url *)
 

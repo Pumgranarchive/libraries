@@ -8,7 +8,7 @@ open Yojson.Basic
 
 (* youtube request part *)
 lwt _ =
-    lwt youtube_video = Youtube_http.search_video "le fossoyeur" "snippet" "2" in
+    lwt youtube_video = Youtube_http.search_video "le fossoyeur" "2" in
     Lwt.return (
       List.map Youtube_http.print_youtube_video youtube_video
     )
