@@ -7,48 +7,52 @@
 ** PRIVATE
 *)
 
+(*** Conf ***)
+(* size of sliced description field got from the json of a video*)
+let g_description_size = 50
+
 
 (*** youtube API ***)
 (* API Key *)
-let youtube_api_key = "AIzaSyBlcjTwKF9UmOqnnExTZGgdY9nwS_0C5A8"
+let g_youtube_api_key = "AIzaSyBlcjTwKF9UmOqnnExTZGgdY9nwS_0C5A8"
 
 (* item kind (API values) *)
 (* let search_result_item_kind = "youtube#searchResult" *)
 (* let video_item_kind = "youtube#video" *)
 
 (*** youtube url ***)
-let youtube_base_url = "https://www.googleapis.com/youtube/v3/"
+let g_youtube_base_url = "https://www.googleapis.com/youtube/v3/"
 
 (*** Url creator ***)
 let create_youtube_search_url query parts max_results =
-  youtube_base_url ^ "search"
+  g_youtube_base_url ^ "search"
   ^ "?part=" ^ parts
   ^ "&maxResults=" ^ max_results
   ^ "&q=" ^ query
-  ^ "&key=" ^ youtube_api_key
+  ^ "&key=" ^ g_youtube_api_key
 
 let create_youtube_search_url query parts max_results type_of_result =
-  youtube_base_url ^ "search"
+  g_youtube_base_url ^ "search"
   ^ "?type=" ^ type_of_result
   ^ "&part=" ^ parts
   ^ "&maxResults=" ^ max_results
   ^ "&q=" ^ query
-  ^ "&key=" ^ youtube_api_key
+  ^ "&key=" ^ g_youtube_api_key
 
 (* let create_youtube_video_url video_id parts = *)
-(*   youtube_base_url *)
+(*   g_youtube_base_url *)
 (*   ^ "videos?id=" ^ video_id *)
 (*   ^ "&part=" ^ parts *)
-(*   ^ "&key=" ^ youtube_api_key *)
+(*   ^ "&key=" ^ g_youtube_api_key *)
 
 let create_youtube_video_url video_ids parts =
   let rec comma_separated_strings_of_list video_ids =
     List.fold_right (fun l r -> l ^ "," ^ r) video_ids ""
   in
-  youtube_base_url
+  g_youtube_base_url
   ^ "videos?id=" ^ (comma_separated_strings_of_list video_ids)
   ^ "&part=" ^ parts
-  ^ "&key=" ^ youtube_api_key
+  ^ "&key=" ^ g_youtube_api_key
 
 
 (*** json accessors ***)
@@ -100,12 +104,17 @@ let print_youtube_json json =
 
 
 (* a video is a tuple (title * url * description) *)
-(* TODO: limit description to 50 chars *)
 let video_of_json json =
   let create_video current_item =
     let snippet = get_snippet_field current_item in
     let url = get_video_url current_item in
-    (get_title_field snippet, url, get_description_field snippet)
+    let description =
+      let tmp = (get_description_field snippet) in
+      if String.length tmp > g_description_size
+      then (String.sub tmp 0 g_description_size) ^ "..."
+      else tmp
+    in
+    (get_title_field snippet, url, description)
   in
   List.map create_video (get_items_field json)
 
