@@ -1,3 +1,4 @@
+
 (*
 ** Binding http of youtube API with ocaml
 *)
@@ -89,6 +90,7 @@ let print_youtube_json json =
 
 
 (* a video is a tuple (title * url * description) *)
+(* TODO: limit description to 50 chars *)
 let video_of_json json =
   let create_video current_item =
     let snippet = get_snippet_field current_item in
@@ -120,7 +122,23 @@ let search_video request max_result =
   lwt youtube_json = Http_request_manager.request ~display_body:false url in
   Lwt.return (video_of_json youtube_json)
 
-
-(* let get_video_by_url video_url = *)
-(*   let extract_url *)
-
+(*
+TODO: video_url must be a list of string (multiple url accepted)
+*)
+let get_video_from_url video_url =
+  (* README: Changing "uri_reg" may change the behavior of "extract_id url" because of "Str.group_end n"*)
+  let uri_reg =
+    Str.regexp "\\(https?://\\)?\\(www\\.\\)?youtu\\(\\.be/\\|be\\.com/\\)\\(\\(.+/\\)?\\(watch\\(\\?v=\\|.+&v=\\)\\)?\\(v=\\)?\\)\\([-A-Za-z0-9_]\\)*\\(&.+\\)?" in
+  let is_url_from_youtube url = Str.string_match uri_reg url 0 in
+  let extract_id url =
+    let _ = Str.string_match uri_reg url 0 in
+    let id_start = Str.group_end 4 and id_end = Str.group_end 9 in
+    String.sub url id_start (id_end - id_start)
+  in
+  if (is_url_from_youtube video_url) = false
+  then (print_endline "TODO");
+  let video_id = extract_id video_url in
+  let youtube_url_http = create_youtube_video_url video_id "snippet" in
+  lwt youtube_json = Http_request_manager.request ~display_body:true youtube_url_http
+  in
+  Lwt.return (video_of_json youtube_json)

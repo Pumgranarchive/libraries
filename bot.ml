@@ -1,5 +1,5 @@
 
-open Rdf_sparql
+(* open Rdf_sparql *)
 open Yojson.Basic
 
 (*
@@ -8,10 +8,13 @@ open Yojson.Basic
 
 (* youtube request part *)
 lwt _ =
-    lwt youtube_video = Youtube_http.search_video "le fossoyeur" "2" in
-    Lwt.return (
-      List.map Youtube_http.print_youtube_video youtube_video
-    )
+    (* lwt youtube_video = Youtube_http.search_video "le fossoyeur" "2" in *)
+    lwt tamer = Youtube_http.get_video_from_url "https://www.youtube.com/watch?v=WFDR6OwFcn4" in
+    Lwt.return (List.map Youtube_http.print_youtube_video tamer)
+    (* List.map print_endline (Rdf_uri.path tamer); *)
+    (* Lwt.return ( *)
+    (*   List.map Youtube_http.print_youtube_video youtube_video *)
+    (* ) *)
 
 
 (* freebase request part *)
