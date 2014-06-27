@@ -39,12 +39,6 @@ let create_youtube_search_url query parts max_results type_of_result =
   ^ "&q=" ^ query
   ^ "&key=" ^ g_youtube_api_key
 
-(* let create_youtube_video_url video_id parts = *)
-(*   g_youtube_base_url *)
-(*   ^ "videos?id=" ^ video_id *)
-(*   ^ "&part=" ^ parts *)
-(*   ^ "&key=" ^ g_youtube_api_key *)
-
 let create_youtube_video_url video_ids parts =
   let rec comma_separated_strings_of_list video_ids =
     List.fold_right (fun l r -> l ^ "," ^ r) video_ids ""
