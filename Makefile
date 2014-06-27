@@ -9,15 +9,25 @@ CMO :=		$(ML:.ml=.cmo)
 CMI :=		$(MLI:.mli=.cmi)
 LIB :=		-package $(PACKAGES)
 SYNTAX :=	-syntax camlp4o -package lwt.syntax
-OCAMLC :=	ocamlfind ocamlc $(SYNTAX) -linkpkg $(LIB)
-OCAMLDEP :=	ocamlfind ocamldep $(SYNTAX) $(LIB)
+OCAMLFIND :=	ocamlfind
+OCAMLC :=	$(OCAMLFIND) ocamlc $(SYNTAX) -linkpkg $(LIB)
+OCAMLDEP :=	$(OCAMLFIND) ocamldep $(SYNTAX) $(LIB)
 
-RM := rm -fv
+RM :=		rm -fv
 
-all:    	$(NAME)
+all:		$(NAME) lib
 
 $(NAME):	$(CMI) $(CMO)
 		$(OCAMLC) -o $@
+
+lib:		$(CMI) $(CMO)
+		$(OCAMLC) -a $(CMI) $(CMO) -o $(NAME).cma
+
+install:	lib
+		$(OCAMLFIND) install $(NAME) META $(NAME).cma
+
+uninstall:
+		$(OCAMLFIND) remove $(NAME)
 
 .SUFFIXES:	.ml .mli .cmo .cmi
 
@@ -29,7 +39,7 @@ $(NAME):	$(CMI) $(CMO)
 
 clean:
 		@$(RM) *.cm[io]
-		@$(RM) $(NAME)
+		@$(RM) $(NAME) $(NAME).cma
 
 .depend:	$(ML)
 		$(OCAMLDEP) $(MLI) $(ML) > .depend
