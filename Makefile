@@ -1,14 +1,37 @@
-PROJECT_NAME := pumfreebot
+NAME :=		bfy
 
-MY_FILES := http_request_manager.ml youtube_http.ml freebase_http.ml bot.ml
-DEPS := str.cma
+MLI :=		$(wildcard *.mli)
+ML :=		$(wildcard *.ml)
+
+PACKAGES :=	lwt,cohttp,cohttp.lwt,yojson,str
+
+CMO :=		$(ML:.ml=.cmo)
+CMI :=		$(MLI:.mli=.cmi)
+LIB :=		-package $(PACKAGES)
+SYNTAX :=	-syntax camlp4o -package lwt.syntax
+OCAMLC :=	ocamlfind ocamlc $(SYNTAX) -linkpkg $(LIB)
+OCAMLDEP :=	ocamlfind ocamldep $(SYNTAX) $(LIB)
 
 RM := rm -fv
 
-all:
-	ocamlfind ocamlc -syntax camlp4o -package lwt.syntax -linkpkg -package lwt,cohttp,cohttp.lwt,yojson -o $(PROJECT_NAME) $(DEPS) $(MY_FILES)
+all:    	$(NAME)
 
+$(NAME):	$(CMI) $(CMO)
+		$(OCAMLC) -o $@
+
+.SUFFIXES:	.ml .mli .cmo .cmi
+
+.ml.cmo:
+		$(OCAMLC) -c $<
+
+.mli.cmi:
+		$(OCAMLC) -c $<
 
 clean:
-	@$(RM) *.cmi *.cmo
-	@$(RM) $(PROJECT_NAME)
+		@$(RM) *.cm[io]
+		@$(RM) $(NAME)
+
+.depend:	$(ML)
+		$(OCAMLDEP) $(MLI) $(ML) > .depend
+
+include .depend
