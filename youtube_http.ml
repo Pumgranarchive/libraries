@@ -32,20 +32,14 @@ type video = (title * url * sliced_description * categories)
 (* size of sliced description field got from the json of a video*)
 let g_description_size = 50
 
-
-(*** youtube API ***)
 (* API Key *)
 let g_youtube_api_key = "AIzaSyBlcjTwKF9UmOqnnExTZGgdY9nwS_0C5A8"
 
-(* item kind (API values) *)
-(* let search_result_item_kind = "youtube#searchResult" *)
-(* let video_item_kind = "youtube#video" *)
-
-(*** youtube url ***)
+(* youtube url *)
 let g_api_base_url = "https://www.googleapis.com/youtube/v3/"
 let g_video_base_url = "https://www.youtube.com/watch?v="
 
-(*** Url creator ***)
+(*** Url constructor ***)
 let create_youtube_search_url query parts fields max_results type_of_result =
   g_api_base_url ^ "search"
   ^ "?type=" ^ type_of_result
@@ -66,19 +60,21 @@ let create_youtube_video_url video_ids parts fields =
   ^ "&key=" ^ g_youtube_api_key
 
 
-(** same as Yojson.Basic.Util.member but return `Null if json is null *)
+(*** Yojson wrap ***)
+
+(* Same as Yojson.Basic.Util.member but return `Null if json is null *)
 let member name json = match json with
   | `Null       -> `Null
   | _           -> Yojson.Basic.Util.member name json
 
-(** Extract a list from JSON array or raise Yojson_exc.
+(* Extract a list from JSON array or raise Yojson_exc.
     `Null are assume as empty list. *)
 let to_list = function
   | `Null   -> []
   | `List l -> l
   | _       -> raise (Yojson_exc "Bad list format")
 
-(** Extract a list from JSON array or raise Yojson_exc.
+(* Extract a list from JSON array or raise Yojson_exc.
     `Null are assume as empty list. *)
 let to_string = function
   | `Null   -> ""
@@ -121,6 +117,7 @@ let get_relevantTopicIds_field json =
     to_string
     (to_list (member "relevantTopicIds" json))
 
+(*** Unclassed ***)
 let videos_of_json json =
   let get_video_url item =
     let item_id = get_id_field item in
@@ -157,6 +154,8 @@ let videos_of_json json =
 *)
 
 (*** Constructors ***)
+(** create an id from a youtube url.
+    An exception will be raised if the url is not correct *)
 let get_id_from_url url =
   (* README: Changing "uri_reg" may change the behavior of "extract_id url" because of "Str.group_end n"*)
   let uri_reg =
@@ -173,7 +172,7 @@ let get_id_from_url url =
 
 
 (*** Printing ***)
-
+(** Print a video on stdout *)
 let print_youtube_video (title, url, description, categories) =
   let string_of_categories (topic_ids, relevant_topic_ids) =
     let rec aux = function
@@ -222,4 +221,4 @@ let search_video request max_result =
   lwt youtube_json = Http_request_manager.request ~display_body:false url in
   let videos = videos_of_json youtube_json in
   let ids = (List.map get_id_from_url (List.map get_url_from_video videos)) in
-  get_video_from_id ids
+  get_videos_from_ids ids
