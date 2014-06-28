@@ -7,15 +7,22 @@
 ** exceptions
 *)
 exception Bad_youtube_url of string
+exception Yojson_exc of string
 
 (*
 ** Types
 *)
+(* private *)
 type id = string
+
+(* public *)
 type title = string
 type url = string
-type description = string
-type video = (title * url * description)
+type tight_description = string
+type topic_ids = string list
+type relevant_topic_ids = string list
+type categories = (topic_ids * relevant_topic_ids)
+type video = (title * url * tight_description * categories)
 
 (*
 ** PRIVATE
@@ -38,89 +45,109 @@ let g_youtube_api_key = "AIzaSyBlcjTwKF9UmOqnnExTZGgdY9nwS_0C5A8"
 let g_youtube_base_url = "https://www.googleapis.com/youtube/v3/"
 
 (*** Url creator ***)
-let create_youtube_search_url query parts max_results =
-  g_youtube_base_url ^ "search"
-  ^ "?part=" ^ parts
-  ^ "&maxResults=" ^ max_results
-  ^ "&q=" ^ query
-  ^ "&key=" ^ g_youtube_api_key
-
-let create_youtube_search_url query parts max_results type_of_result =
+let create_youtube_search_url query parts fields max_results type_of_result =
   g_youtube_base_url ^ "search"
   ^ "?type=" ^ type_of_result
   ^ "&part=" ^ parts
+  ^ "&fields=" ^ fields
   ^ "&maxResults=" ^ max_results
   ^ "&q=" ^ query
   ^ "&key=" ^ g_youtube_api_key
 
-let create_youtube_video_url video_ids parts =
+let create_youtube_video_url video_ids parts fields =
   let rec comma_separated_strings_of_list video_ids =
     List.fold_right (fun l r -> l ^ "," ^ r) video_ids ""
   in
   g_youtube_base_url
   ^ "videos?id=" ^ (comma_separated_strings_of_list video_ids)
   ^ "&part=" ^ parts
+  ^ "&fields=" ^ fields
   ^ "&key=" ^ g_youtube_api_key
+
+
+(** same as Yojson.Basic.Util.member but return `Null if json is null *)
+let member name json = match json with
+  | `Null       -> `Null
+  | _           -> Yojson.Basic.Util.member name json
+
+(** Extract a list from JSON array or raise Yojson_exc.
+    `Null are assume as empty list. *)
+let to_list = function
+  | `Null   -> []
+  | `List l -> l
+  | _       -> raise (Yojson_exc "Bad list format")
+
+(** Extract a list from JSON array or raise Yojson_exc.
+    `Null are assume as empty list. *)
+let to_string = function
+  | `Null   -> ""
+  | `String s -> s
+  | _       -> raise (Yojson_exc "Bad list format")
 
 
 (*** json accessors ***)
 let get_items_field json =
-  Yojson.Basic.Util.to_list (Yojson.Basic.Util.member "items" json)
+  to_list (member "items" json)
 
 let get_kind_field json =
-  Yojson.Basic.Util.to_string (Yojson.Basic.Util.member "kind" json)
+  to_string (member "kind" json)
 
 let get_id_field json =
-  Yojson.Basic.Util.member "id" json
+  member "id" json
 
-let get_videoid_field json =
-  Yojson.Basic.Util.to_string (Yojson.Basic.Util.member "videoId" json)
+let get_videoId_field json =
+  to_string (member "videoId" json)
 
 let get_snippet_field json =
-  Yojson.Basic.Util.member "snippet" json
+  member "snippet" json
 
 let get_title_field json =
-  Yojson.Basic.Util.to_string (Yojson.Basic.Util.member "title" json)
+  to_string (member "title" json)
 
 let get_description_field json =
-  Yojson.Basic.Util.to_string (Yojson.Basic.Util.member "description" json)
+  to_string (member "description" json)
 
-let get_video_url item =
-  let item_id = get_id_field item in
-  let get_url_from_assoc assoc =
-    get_videoid_field assoc
-  in
-  match item_id with
-  | `String s -> s
-  | `Assoc a -> get_url_from_assoc item_id
-  | _   -> "Unable to find url"
+let get_topicDetails_field json =
+  member "topicDetails" json
 
+let get_topicIds_field json =
+  List.map
+    to_string
+    (to_list (member "topicIds" json))
 
-(* DEBUG: Printer *)
-let print_youtube_json json =
-  let print_current_item item =
-    let snippet = get_snippet_field item in
-    let url = get_video_url item
-    in
-    print_endline (
-      "<== ITEM ==>\n"
-      ^"-->Title:\"" ^ (get_title_field snippet) ^ "\"\n"
-      ^ "-->Url:\"" ^ url ^ "\"\n"
-      ^ "-->Description:\"" ^ (get_description_field snippet) ^ "\"\n") in
-  List.map print_current_item (get_items_field json)
-
+let get_relevantTopicIds_field json =
+  List.map
+    to_string
+    (to_list (member "relevantTopicIds" json))
 
 let video_of_json json =
-  let create_video current_item =
-    let snippet = get_snippet_field current_item in
-    let url = get_video_url current_item in
+  let get_video_url item =
+    let item_id = get_id_field item in
+    let get_url_from_assoc assoc =
+      get_videoId_field assoc
+    in
+    match item_id with
+    | `String s -> s
+    | `Assoc a -> get_url_from_assoc item_id
+    | _   -> "Unable to find url"
+  in
+  let get_categories item =
+    let topic_details = get_topicDetails_field item in
+    let topic_ids = get_topicIds_field topic_details in
+    let relevant_topic_ids = get_relevantTopicIds_field topic_details in
+    (topic_ids,relevant_topic_ids)
+  in
+  let create_video item =
+    let snippet = get_snippet_field item in
+    let url = get_video_url item in
     let description =
       let tmp = (get_description_field snippet) in
       if String.length tmp > g_description_size
       then (String.sub tmp 0 g_description_size) ^ "..."
-      else tmp
+      else tmp in
+    let categories = get_categories item
     in
-    (get_title_field snippet, url, description)
+    (get_title_field snippet, url, description, categories)
   in
   List.map create_video (get_items_field json)
 
@@ -146,12 +173,21 @@ let get_id_from_url url =
 
 (*** Printing ***)
 
-let print_youtube_video (title, url, description) =
+let print_youtube_video (title, url, description, categories) =
+  let string_of_categories (topic_ids, relevant_topic_ids) =
+    let rec aux = function
+      | h::t    -> "\n    -" ^ h ^ (aux t)
+      | _       -> ""
+    in
+    "\n  -TopicIds:" ^ (aux topic_ids)
+    ^ "\n  -RelevantTopicIds:" ^ (aux relevant_topic_ids)
+  in
   print_endline (
     "<== Video ==>\n"
     ^"->Title:\"" ^ title ^ "\"\n"
     ^ "->Url:\"" ^ url ^ "\"\n"
-    ^ "->Description:\"" ^ description ^ "\"\n")
+    ^ "->Description:\"" ^ description ^ "\"\n"
+    ^ "->Categories:" ^ (string_of_categories categories) ^ "\n")
 
 (*** Requests ***)
 
@@ -160,13 +196,23 @@ let print_youtube_video (title, url, description) =
 *)
 let search_video request max_result =
   let url =
-    create_youtube_search_url request "snippet" (string_of_int max_result) "video"
+    create_youtube_search_url
+      request
+      "snippet"
+      "items(id,snippet(title,description))"
+      (string_of_int max_result)
+      "video"
   in
   lwt youtube_json = Http_request_manager.request ~display_body:false url in
+  (* TODO: get_video_from_id *)
   Lwt.return (video_of_json youtube_json)
 
 let get_video_from_id video_ids =
-  let youtube_url_http = create_youtube_video_url video_ids "snippet" in
-  lwt youtube_json = Http_request_manager.request youtube_url_http
+  let youtube_url_http =
+    create_youtube_video_url
+      video_ids
+      "snippet,topicDetails"
+      "items(id,snippet(title,description),topicDetails)" in
+  lwt youtube_json = Http_request_manager.request ~display_body:false youtube_url_http
   in
   Lwt.return (video_of_json youtube_json)

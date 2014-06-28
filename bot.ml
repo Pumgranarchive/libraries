@@ -7,10 +7,10 @@ open Yojson.Basic
 *)
 
 lwt _ =
-    (* lwt youtube_video = Youtube_http.search_video "le fossoyeur" x2 in *)
+    (* lwt tamer = Youtube_http.search_video "le fossoyeur" 2 *)
     lwt tamer =
     let url_list = ["https://www.youtube.com/watch?v=WFDR6OwFcn4";
-       "https://www.youtube.com/watch?v=a-7MKTjzW_I"] in
+       "https://www.youtube.com/watch?v=a-7MKTjzW_I";"https://www.youtube.com/watch?v=j7uiWGEPxNQ"] in
     let id_list = List.map Youtube_http.get_id_from_url url_list
     in
     Youtube_http.get_video_from_id id_list
