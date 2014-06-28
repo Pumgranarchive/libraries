@@ -1,6 +1,9 @@
 
-(*** Type ***)
+(*** Types ***)
+(* private *)
 type id
+
+(* public *)
 type title = string
 type url = string
 type description = string
