@@ -1,35 +1,45 @@
 NAME :=		bfy
 
-MLI :=		$(wildcard *.mli)
-ML :=		$(wildcard *.ml)
+ML :=		freebase_http.ml	\
+		http_request_manager.ml	\
+		youtube_http.ml		\
+		bot.ml
+
+MLI :=		youtube_http.mli
+
 
 PACKAGES :=	lwt,cohttp,cohttp.lwt,yojson,str
 
+CMX :=		$(ML:.ml=.cmx)
 CMO :=		$(ML:.ml=.cmo)
 CMI :=		$(MLI:.mli=.cmi)
 LIB :=		-package $(PACKAGES)
 SYNTAX :=	-syntax camlp4o -package lwt.syntax
 OCAMLFIND :=	ocamlfind
 OCAMLC :=	$(OCAMLFIND) ocamlc $(SYNTAX) -linkpkg $(LIB)
+OCAMLOPT :=	$(OCAMLFIND) ocamlopt $(SYNTAX) -linkpkg $(LIB)
 OCAMLDEP :=	$(OCAMLFIND) ocamldep $(SYNTAX) $(LIB)
 
 RM :=		rm -fv
 
 all:		$(NAME) lib
 
-$(NAME):	$(CMI) $(CMO)
-		$(OCAMLC) -o $@
+$(NAME):	.depend $(CMI) $(CMX)
+		$(OCAMLOPT) -o $@ $(CMX)
 
 lib:		$(CMI) $(CMO)
-		$(OCAMLC) -a $(CMI) $(CMO) -o $(NAME).cma
+		$(OCAMLC) -a $(CMO) -o $(NAME).cmxa
 
 install:	lib
-		$(OCAMLFIND) install $(NAME) META $(NAME).cma
+		$(OCAMLFIND) install $(NAME) META $(NAME).cmxa
 
 uninstall:
 		$(OCAMLFIND) remove $(NAME)
 
-.SUFFIXES:	.ml .mli .cmo .cmi
+.SUFFIXES:	.ml .mli .cmo .cmi .cmx
+
+.ml.cmx:
+		$(OCAMLOPT) -c $<
 
 .ml.cmo:
 		$(OCAMLC) -c $<
@@ -38,10 +48,12 @@ uninstall:
 		$(OCAMLC) -c $<
 
 clean:
-		@$(RM) *.cm[io]
-		@$(RM) $(NAME) $(NAME).cma
+		@$(RM) *.cm[iox] *.o
+		@$(RM) $(NAME) $(NAME).cmxa
 
-.depend:	$(ML)
+re:		clean $(NAME)
+.depend:	# $(ML)
+		@$(RM) .depend
 		$(OCAMLDEP) $(MLI) $(ML) > .depend
 
-include .depend
+#include .dependbot.ml
