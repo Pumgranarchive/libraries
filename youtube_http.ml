@@ -4,6 +4,20 @@
 *)
 
 (*
+** exceptions
+*)
+exception Bad_youtube_url of string
+
+(*
+** Types
+*)
+type id = string
+type title = string
+type url = string
+type description = string
+type video = (title * url * description)
+
+(*
 ** PRIVATE
 *)
 
@@ -82,7 +96,6 @@ let get_video_url item =
   | _   -> "Unable to find url"
 
 
-
 (* DEBUG: Printer *)
 let print_youtube_json json =
   let print_current_item item =
@@ -97,7 +110,6 @@ let print_youtube_json json =
   List.map print_current_item (get_items_field json)
 
 
-(* a video is a tuple (title * url * description) *)
 let video_of_json json =
   let create_video current_item =
     let snippet = get_snippet_field current_item in
@@ -116,6 +128,24 @@ let video_of_json json =
 ** PUBLIC
 *)
 
+(*** Constructors ***)
+let get_id_from_url url =
+  (* README: Changing "uri_reg" may change the behavior of "extract_id url" because of "Str.group_end n"*)
+  let uri_reg =
+    Str.regexp "\\(https?://\\)?\\(www\\.\\)?youtu\\(\\.be/\\|be\\.com/\\)\\(\\(.+/\\)?\\(watch\\(\\?v=\\|.+&v=\\)\\)?\\(v=\\)?\\)\\([-A-Za-z0-9_]\\)*\\(&.+\\)?" in
+  let is_url_from_youtube url = Str.string_match uri_reg url 0 in
+  let extract_id_from_url url =
+    let _ = Str.string_match uri_reg url 0 in
+    let id_start = Str.group_end 4 and id_end = Str.group_end 9 in
+    String.sub url id_start (id_end - id_start)
+  in
+  if (is_url_from_youtube url) = false
+  then raise (Bad_youtube_url "Youtube url pattern not recognized.")
+  else extract_id_from_url url
+
+
+(*** Printing ***)
+
 let print_youtube_video (title, url, description) =
   print_endline (
     "<== Video ==>\n"
@@ -123,34 +153,19 @@ let print_youtube_video (title, url, description) =
     ^ "->Url:\"" ^ url ^ "\"\n"
     ^ "->Description:\"" ^ description ^ "\"\n")
 
-(*** Other ***)
+(*** Requests ***)
 
 (**
 ** This function will make an http request and return a list of video as a list of tup** le (title * url * description)
 *)
 let search_video request max_result =
   let url =
-    create_youtube_search_url request "snippet" max_result "video"
+    create_youtube_search_url request "snippet" (string_of_int max_result) "video"
   in
   lwt youtube_json = Http_request_manager.request ~display_body:false url in
   Lwt.return (video_of_json youtube_json)
 
-let get_video_from_url video_urls =
-  (* README: Changing "uri_reg" may change the behavior of "extract_id url" because of "Str.group_end n"*)
-  let uri_reg =
-    Str.regexp "\\(https?://\\)?\\(www\\.\\)?youtu\\(\\.be/\\|be\\.com/\\)\\(\\(.+/\\)?\\(watch\\(\\?v=\\|.+&v=\\)\\)?\\(v=\\)?\\)\\([-A-Za-z0-9_]\\)*\\(&.+\\)?" in
-  let get_id_from_url url =
-    let is_url_from_youtube url = Str.string_match uri_reg url 0 in
-    let extract_id_from_url url =
-      let _ = Str.string_match uri_reg url 0 in
-      let id_start = Str.group_end 4 and id_end = Str.group_end 9 in
-      String.sub url id_start (id_end - id_start)
-    in
-    if (is_url_from_youtube url) = false
-    then ""
-    else extract_id_from_url url
-  in
-  let video_ids = List.map get_id_from_url video_urls in
+let get_video_from_id video_ids =
   let youtube_url_http = create_youtube_video_url video_ids "snippet" in
   lwt youtube_json = Http_request_manager.request youtube_url_http
   in
