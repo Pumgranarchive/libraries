@@ -18,11 +18,11 @@ type id = string
 (* public *)
 type title = string
 type url = string
-type tight_description = string
+type sliced_description = string
 type topic_ids = string list
 type relevant_topic_ids = string list
 type categories = (topic_ids * relevant_topic_ids)
-type video = (title * url * tight_description * categories)
+type video = (title * url * sliced_description * categories)
 
 (*
 ** PRIVATE
@@ -42,11 +42,12 @@ let g_youtube_api_key = "AIzaSyBlcjTwKF9UmOqnnExTZGgdY9nwS_0C5A8"
 (* let video_item_kind = "youtube#video" *)
 
 (*** youtube url ***)
-let g_youtube_base_url = "https://www.googleapis.com/youtube/v3/"
+let g_api_base_url = "https://www.googleapis.com/youtube/v3/"
+let g_video_base_url = "https://www.youtube.com/watch?v="
 
 (*** Url creator ***)
 let create_youtube_search_url query parts fields max_results type_of_result =
-  g_youtube_base_url ^ "search"
+  g_api_base_url ^ "search"
   ^ "?type=" ^ type_of_result
   ^ "&part=" ^ parts
   ^ "&fields=" ^ fields
@@ -58,7 +59,7 @@ let create_youtube_video_url video_ids parts fields =
   let rec comma_separated_strings_of_list video_ids =
     List.fold_right (fun l r -> l ^ "," ^ r) video_ids ""
   in
-  g_youtube_base_url
+  g_api_base_url
   ^ "videos?id=" ^ (comma_separated_strings_of_list video_ids)
   ^ "&part=" ^ parts
   ^ "&fields=" ^ fields
@@ -120,11 +121,11 @@ let get_relevantTopicIds_field json =
     to_string
     (to_list (member "relevantTopicIds" json))
 
-let video_of_json json =
+let videos_of_json json =
   let get_video_url item =
     let item_id = get_id_field item in
     let get_url_from_assoc assoc =
-      get_videoId_field assoc
+      g_video_base_url ^ get_videoId_field assoc
     in
     match item_id with
     | `String s -> s
@@ -192,7 +193,21 @@ let print_youtube_video (title, url, description, categories) =
 (*** Requests ***)
 
 (**
-** This function will make an http request and return a list of video as a list of tup** le (title * url * description)
+** return a list of video from a list of id
+*)
+let get_videos_from_ids video_ids =
+  let youtube_url_http =
+    create_youtube_video_url
+      video_ids
+      "snippet,topicDetails"
+      "items(id,snippet(title,description),topicDetails)" in
+  lwt youtube_json = Http_request_manager.request ~display_body:false youtube_url_http
+  in
+  Lwt.return (videos_of_json youtube_json)
+
+
+(**
+** get a list of video from a research
 *)
 let search_video request max_result =
   let url =
@@ -203,16 +218,8 @@ let search_video request max_result =
       (string_of_int max_result)
       "video"
   in
+  let get_url_from_video (_, url, _, _) = url in
   lwt youtube_json = Http_request_manager.request ~display_body:false url in
-  (* TODO: get_video_from_id *)
-  Lwt.return (video_of_json youtube_json)
-
-let get_video_from_id video_ids =
-  let youtube_url_http =
-    create_youtube_video_url
-      video_ids
-      "snippet,topicDetails"
-      "items(id,snippet(title,description),topicDetails)" in
-  lwt youtube_json = Http_request_manager.request ~display_body:false youtube_url_http
-  in
-  Lwt.return (video_of_json youtube_json)
+  let videos = videos_of_json youtube_json in
+  let ids = (List.map get_id_from_url (List.map get_url_from_video videos)) in
+  get_video_from_id ids

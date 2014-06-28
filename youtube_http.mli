@@ -6,11 +6,11 @@ type id
 (* public *)
 type title = string
 type url = string
-type tight_description = string
+type sliced_description = string
 type topic_ids = string list
 type relevant_topic_ids = string list
 type categories = (topic_ids * relevant_topic_ids)
-type video = (title * url * tight_description * categories)
+type video = (title * url * sliced_description * categories)
 
 (*** Constructors ***)
 val get_id_from_url     : string -> id
@@ -19,7 +19,7 @@ val get_id_from_url     : string -> id
 val print_youtube_video : video -> unit
 
 (*** Requests ***)
-val get_video_from_id   : id list -> video list Lwt.t
+val get_videos_from_ids   : id list -> video list Lwt.t
 val search_video        : string -> int -> video list Lwt.t
 
 
