@@ -59,63 +59,40 @@ let create_youtube_video_url video_ids parts fields =
   ^ "&fields=" ^ fields
   ^ "&key=" ^ g_youtube_api_key
 
-
-(*** Yojson wrap ***)
-
-(* Same as Yojson.Basic.Util.member but return `Null if json is null *)
-let member name json = match json with
-  | `Null       -> `Null
-  | _           -> Yojson.Basic.Util.member name json
-
-(* Extract a list from JSON array or raise Yojson_exc.
-    `Null are assume as empty list. *)
-let to_list = function
-  | `Null   -> []
-  | `List l -> l
-  | _       -> raise (Yojson_exc "Bad list format")
-
-(* Extract a list from JSON array or raise Yojson_exc.
-    `Null are assume as empty list. *)
-let to_string = function
-  | `Null   -> ""
-  | `String s -> s
-  | _       -> raise (Yojson_exc "Bad list format")
-
-
 (*** json accessors ***)
 let get_items_field json =
-  to_list (member "items" json)
+  Yojson_wrap.to_list (Yojson_wrap.member "items" json)
 
 let get_kind_field json =
-  to_string (member "kind" json)
+  Yojson_wrap.to_string (Yojson_wrap.member "kind" json)
 
 let get_id_field json =
-  member "id" json
+  Yojson_wrap.member "id" json
 
 let get_videoId_field json =
-  to_string (member "videoId" json)
+  Yojson_wrap.to_string (Yojson_wrap.member "videoId" json)
 
 let get_snippet_field json =
-  member "snippet" json
+  Yojson_wrap.member "snippet" json
 
 let get_title_field json =
-  to_string (member "title" json)
+  Yojson_wrap.to_string (Yojson_wrap.member "title" json)
 
 let get_description_field json =
-  to_string (member "description" json)
+  Yojson_wrap.to_string (Yojson_wrap.member "description" json)
 
 let get_topicDetails_field json =
-  member "topicDetails" json
+  Yojson_wrap.member "topicDetails" json
 
 let get_topicIds_field json =
   List.map
-    to_string
-    (to_list (member "topicIds" json))
+    Yojson_wrap.to_string
+    (Yojson_wrap.to_list (Yojson_wrap.member "topicIds" json))
 
 let get_relevantTopicIds_field json =
   List.map
-    to_string
-    (to_list (member "relevantTopicIds" json))
+    Yojson_wrap.to_string
+    (Yojson_wrap.to_list (Yojson_wrap.member "relevantTopicIds" json))
 
 (*** Unclassed ***)
 let videos_of_json json =
