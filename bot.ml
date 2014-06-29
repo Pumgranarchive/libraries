@@ -17,7 +17,7 @@ lwt _ =
   in
   Lwt.return (List.map Youtube_http.print_youtube_video tamer)
 
-(* freebase request part *)
-(* let freebase_url_final = Freebase_http.create_freebase_search_url "bob" *)
-(* lwt freebase_results = exec_http_request freebase_url_final *)
-(* let freebase_json = get_json_from_http_results freebase_results *)
+lwt _ =
+  lwt freebase_results = Freebase_http.search "bob" in
+  Lwt.return (Freebase_http.print_json freebase_results)
+

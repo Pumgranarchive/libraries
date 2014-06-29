@@ -2,8 +2,8 @@ NAME :=		bfy
 
 ML :=		yojson_wrap.ml		\
 		bfy_helpers.ml		\
-		freebase_http.ml	\
 		http_request_manager.ml	\
+		freebase_http.ml	\
 		youtube_http.ml		\
 		bot.ml
 
