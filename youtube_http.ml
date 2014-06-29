@@ -7,7 +7,6 @@
 ** exceptions
 *)
 exception Bad_youtube_url of string
-exception Yojson_exc of string
 
 (*
 ** Types
@@ -29,9 +28,6 @@ type video = (title * url * sliced_description * categories)
 *)
 
 (*** Conf ***)
-(* size of sliced description field got from the json of a video*)
-let g_description_size = 50
-
 (* API Key *)
 let g_youtube_api_key = "AIzaSyBlcjTwKF9UmOqnnExTZGgdY9nwS_0C5A8"
 
@@ -50,11 +46,8 @@ let create_youtube_search_url query parts fields max_results type_of_result =
   ^ "&key=" ^ g_youtube_api_key
 
 let create_youtube_video_url video_ids parts fields =
-  let rec comma_separated_strings_of_list video_ids =
-    List.fold_right (fun l r -> l ^ "," ^ r) video_ids ""
-  in
   g_api_base_url
-  ^ "videos?id=" ^ (comma_separated_strings_of_list video_ids)
+  ^ "videos?id=" ^ (Bfy_helpers.strings_of_list video_ids ",")
   ^ "&part=" ^ parts
   ^ "&fields=" ^ fields
   ^ "&key=" ^ g_youtube_api_key
@@ -116,10 +109,7 @@ let videos_of_json json =
     let snippet = get_snippet_field item in
     let url = get_video_url item in
     let description =
-      let tmp = (get_description_field snippet) in
-      if String.length tmp > g_description_size
-      then (String.sub tmp 0 g_description_size) ^ "..."
-      else tmp in
+      Bfy_helpers.reduce_string (get_description_field snippet) 50 in
     let categories = get_categories item
     in
     (get_title_field snippet, url, description, categories)
