@@ -11,7 +11,8 @@ PACKAGES :=	rdf,str,yojson
 
 CMX :=		$(ML:.ml=.cmx)
 CMO :=		$(ML:.ml=.cmo)
-CMI :=		$(wildcard *.cmi)
+CMI :=		$(MLI:.mli=.cmi)
+ALL_CMI :=	$(ML:.ml=.cmi)
 LIB :=		-package $(PACKAGES)
 SYNTAX :=	-syntax camlp4o -package lwt.syntax
 OCAMLFIND :=	ocamlfind
@@ -23,7 +24,7 @@ RM :=		rm -fv
 
 all:		$(NAME) lib
 
-re:		clean $(NAME)
+re:		clean all
 
 $(NAME):	.depend $(CMI) $(CMX)
 		$(OCAMLOPT) -linkpkg $(CMX) -o $@
@@ -32,12 +33,12 @@ lib:		.depend $(CMI) $(CMO)
 		$(OCAMLC) -a $(CMO) -o $(NAME).cma
 
 install:	$(CMI) $(CMX) $(CMO) lib
-		$(OCAMLFIND) install $(NAME) META $(NAME).cma $(CMI) $(CMX) $(CMO)
+		$(OCAMLFIND) install $(NAME) META $(NAME).cma $(ALL_CMI) $(CMX) $(CMO)
 
 uninstall:
 		$(OCAMLFIND) remove $(NAME)
 
-reinstall:	uninstall install
+reinstall:	re uninstall install
 
 .SUFFIXES:	.ml .mli .cmo .cmi .cmx
 
