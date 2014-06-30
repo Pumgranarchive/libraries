@@ -37,6 +37,8 @@ install:	$(CMI) $(CMX) $(CMO) lib
 uninstall:
 		$(OCAMLFIND) remove $(NAME)
 
+reinstall:	uninstall install
+
 .SUFFIXES:	.ml .mli .cmo .cmi .cmx
 
 .ml.cmx:

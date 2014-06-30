@@ -6,6 +6,10 @@ type link_id = uri * uri
 type filter = Most_recent | Most_used | Most_view
 type type_name = Link | Content
 
+(******************************************************************************
+********************************** Tools **************************************
+*******************************************************************************)
+
 let search_forward ~start str1 str2 start_pos =
   let end1 = String.length str1 in
   let end2 = String.length str2 in
@@ -36,6 +40,34 @@ let split sep str =
   in
   List.rev (aux [] str)
 
+let insert str p_start p_end str2 =
+  let str1 = String.sub str 0 p_start in
+  let str3 = String.sub str p_end ((String.length str) - p_end) in
+  str1 ^ str2 ^ str3
+
+let replace_all remove_str replace_str str =
+  let remove_length = String.length remove_str in
+  let rec aux str start =
+    try
+      let p = search_forward ~start:false remove_str str start in
+      let new_p = p - remove_length in
+      let new_url = insert str new_p p replace_str in
+      aux new_url new_p
+    with
+      Not_found -> str
+  in
+  aux str 0
+
+let slash_encode url =
+  replace_all "/" "%2F" url
+
+let slash_decode url =
+  replace_all "%2F" "/" url
+
+(******************************************************************************
+*********************************** Type **************************************
+*******************************************************************************)
+
 let uri_of_string str =
   let _ =
     try search_forward ~start:true "http://" str 0
@@ -59,3 +91,21 @@ let link_id_of_string link_id =
     origin_uri, target_uri
   with e ->
     raise (Invalid_link_id (link_id ^ ": is not a valid link_id"))
+
+let pumgrana_id_of_uri base uri =
+  let str = string_of_uri uri in
+  let pos =
+    try search_forward ~start:true base str 0
+    with Not_found -> raise (Invalid_uri (str ^ ": is not a Pumgrana URI."))
+  in
+  let _ =
+    try
+      let _ = search_forward ~start:false base str pos in
+      raise (Invalid_uri (str ^ ": looks to be an invalid URI."))
+    with Not_found -> ()
+  in
+  String.sub str pos ((String.length str) - pos)
+
+let link_id origin_uri target_uri = origin_uri, target_uri
+
+let tuple_of_link_id link_id = link_id

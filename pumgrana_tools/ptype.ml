@@ -32,3 +32,31 @@ let link_id_of_string link_id =
     origin_uri, target_uri
   with e ->
     raise (Invalid_link_id (link_id ^ ": is not a valid link_id"))
+
+let slash_encode url =
+  let regexp = Str.regexp "/" in
+  Str.global_replace regexp "%2F" url
+
+let slash_decode url =
+  let regexp = Str.regexp "%2F" in
+  Str.global_replace regexp "/" url
+
+let pumgrana_id_of_uri base uri =
+  let str = string_of_uri uri in
+  let regexp1 = Str.regexp ("^" ^ base) in
+  let regexp2 = Str.regexp base in
+  let pos =
+    try Str.search_forward regexp1 str 0
+    with Not_found -> raise (Invalid_uri (str ^ ": is not a Pumgrana URI."))
+  in
+  let _ =
+    try
+      let _ = Str.search_forward regexp2 str pos in
+      raise (Invalid_uri (str ^ ": looks to be an invalid URI."))
+    with Not_found -> ()
+  in
+  String.sub str pos ((String.length str) - pos)
+
+let link_id origin_uri target_uri = origin_uri, target_uri
+
+let tuple_of_link_id link_id = link_id
