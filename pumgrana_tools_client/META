@@ -1,0 +1,5 @@
+name="pctools"
+description="Pumgrana client tools"
+version="0.1"
+depends="yojson"
+archive(byte)="pctools.cma"

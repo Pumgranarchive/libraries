@@ -1,38 +1,38 @@
-NAME :=		pumgrana
+NAME :=		ptools
 
 ML :=		pjson.ml		\
 		ptype.ml		\
-		pdeserialize.ml		\
-		pumgrana.ml		\
+		pdeserialize.ml
 
-MLI :=		ptype.mli		\
-		pumgrana.mli		\
+MLI :=		ptype.mli
 
 
-PACKAGES :=	lwt,cohttp,cohttp.lwt,rdf,str,yojson
+PACKAGES :=	rdf,str,yojson
 
 CMX :=		$(ML:.ml=.cmx)
 CMO :=		$(ML:.ml=.cmo)
-CMI :=		$(MLI:.mli=.cmi)
+CMI :=		$(wildcard *.cmi)
 LIB :=		-package $(PACKAGES)
 SYNTAX :=	-syntax camlp4o -package lwt.syntax
 OCAMLFIND :=	ocamlfind
-OCAMLC :=	$(OCAMLFIND) ocamlc $(SYNTAX) -linkpkg $(LIB)
-OCAMLOPT :=	$(OCAMLFIND) ocamlopt $(SYNTAX) -linkpkg $(LIB)
+OCAMLC :=	$(OCAMLFIND) ocamlc $(SYNTAX) $(LIB)
+OCAMLOPT :=	$(OCAMLFIND) ocamlopt $(SYNTAX) $(LIB)
 OCAMLDEP :=	$(OCAMLFIND) ocamldep $(SYNTAX) $(LIB)
 
 RM :=		rm -fv
 
 all:		$(NAME) lib
 
-$(NAME):	.depend $(CMI) $(CMX)
-		$(OCAMLOPT) -o $@ $(CMX)
+re:		clean $(NAME)
 
-lib:		$(CMI) $(CMO)
+$(NAME):	.depend $(CMI) $(CMX)
+		$(OCAMLOPT) -linkpkg $(CMX) -o $@
+
+lib:		.depend $(CMI) $(CMO)
 		$(OCAMLC) -a $(CMO) -o $(NAME).cma
 
-install:	lib
-		$(OCAMLFIND) install $(NAME) META $(NAME).cma
+install:	$(CMI) $(CMX) $(CMO) lib
+		$(OCAMLFIND) install $(NAME) META $(NAME).cma $(CMI) $(CMX) $(CMO)
 
 uninstall:
 		$(OCAMLFIND) remove $(NAME)
@@ -52,9 +52,7 @@ clean:
 		@$(RM) *.cm[iox] *.o
 		@$(RM) $(NAME) $(NAME).cma
 
-re:		clean $(NAME)
-.depend:	# $(ML)
-		@$(RM) .depend
+.depend:
 		$(OCAMLDEP) $(MLI) $(ML) > .depend
 
-#include .dependbot.ml
+include .depend

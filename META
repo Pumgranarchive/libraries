@@ -1,5 +1,0 @@
-name="pumgrana"
-description="Binding of the Pumgrana API"
-version="0.1"
-depends="lwt,cohttp,cohttp.lwt,str,yojson"
-archive(byte)="pumgrana.cma"
