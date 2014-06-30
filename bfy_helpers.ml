@@ -4,8 +4,10 @@
 *)
 
 let rec strings_of_list list separator =
-  List.fold_right (fun l r -> l ^ separator ^ r) list ""
-
+  let tmp = List.fold_left (fun l r -> l ^ separator ^ r) "" list in
+  let sep_len = String.length separator
+  in
+  String.sub tmp sep_len ((String.length tmp) - sep_len)
 
 let reduce_string string length =
   if String.length string > length
