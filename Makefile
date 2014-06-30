@@ -1,11 +1,15 @@
 NAME :=		pumgrana
 
-ML :=		pumgrana.ml
+ML :=		pjson.ml		\
+		ptype.ml		\
+		pdeserialize.ml		\
+		pumgrana.ml		\
 
-MLI :=
+MLI :=		ptype.mli		\
+		pumgrana.mli		\
 
 
-PACKAGES :=	lwt,cohttp,cohttp.lwt
+PACKAGES :=	lwt,cohttp,cohttp.lwt,rdf,str,yojson
 
 CMX :=		$(ML:.ml=.cmx)
 CMO :=		$(ML:.ml=.cmo)
