@@ -29,10 +29,10 @@ $(NAME):	.depend $(CMI) $(CMX)
 		$(OCAMLOPT) -o $@ $(CMX)
 
 lib:		$(CMI) $(CMO)
-		$(OCAMLC) -a $(CMO) -o $(NAME).cmxa
+		$(OCAMLC) -a $(CMO) -o $(NAME).cma
 
 install:	lib
-		$(OCAMLFIND) install $(NAME) META $(NAME).cmxa
+		$(OCAMLFIND) install $(NAME) META $(NAME).cma
 
 uninstall:
 		$(OCAMLFIND) remove $(NAME)
@@ -50,7 +50,7 @@ uninstall:
 
 clean:
 		@$(RM) *.cm[iox] *.o
-		@$(RM) $(NAME) $(NAME).cmxa
+		@$(RM) $(NAME) $(NAME).cma
 
 re:		clean $(NAME)
 .depend:	# $(ML)
