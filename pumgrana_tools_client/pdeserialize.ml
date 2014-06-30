@@ -23,7 +23,7 @@ let get_service_return func json =
 let get_content_uri_return json =
   try
     let json_content_uri = member "content_uri" json in
-    to_string (List.hd (to_list json_content_uri))
+    Ptype.uri_of_string (to_string (List.hd (to_list json_content_uri)))
   with
   | e -> print_endline (Printexc.to_string e);
     raise (Bad_format "Bad content_uri format")
