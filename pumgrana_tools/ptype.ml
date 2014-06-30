@@ -46,7 +46,7 @@ let pumgrana_id_of_uri base uri =
   let regexp1 = Str.regexp ("^" ^ base) in
   let regexp2 = Str.regexp base in
   let pos =
-    try Str.search_forward regexp1 str 0
+    try (Str.search_forward regexp1 str 0) + (String.length base)
     with Not_found -> raise (Invalid_uri (str ^ ": is not a Pumgrana URI."))
   in
   let _ =
