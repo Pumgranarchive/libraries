@@ -19,6 +19,14 @@ val get_content_detail : uri ->
 val get_contents : ?filter:filter -> ?tags_uri:uri list -> unit ->
   (uri * string * string) list Lwt.t
 
+val insert_content : string -> string -> string ->
+  ?tags_uri:uri list -> unit -> uri Lwt.t
+
+val update_content : uri -> ?title:string -> ?summary:string ->
+  ?body:string -> ?tags_uri:uri list -> unit -> unit Lwt.t
+
+val delete_contents : uri list -> unit Lwt.t
+
 (** {6 Tags}  *)
 
 val tags_by_type : type_name -> (uri * string) list Lwt.t
@@ -26,6 +34,10 @@ val tags_by_type : type_name -> (uri * string) list Lwt.t
 val tags_from_content : uri -> (uri * string) list Lwt.t
 
 val tags_from_content_links : uri -> (uri * string) list Lwt.t
+
+val insert_tags : type_name -> ?uri:uri -> string list -> uri list Lwt.t
+
+val delete_tags : uri list -> unit Lwt.t
 
 (** {6 Links}  *)
 
@@ -37,3 +49,9 @@ val links_from_content : uri ->
 
 val links_from_content_tags : uri -> uri list ->
   (link_id * uri * string * string) list Lwt.t
+
+val insert_links : (uri * uri * uri list) list -> uri list Lwt.t
+
+val update_links : (link_id * uri list) list -> unit Lwt.t
+
+val delete_links : link_id list -> unit Lwt.t
