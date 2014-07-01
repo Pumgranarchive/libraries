@@ -1,6 +1,7 @@
 DIRECTORIES :=	pumgrana_tools_client	\
 		pumgrana_tools		\
-		pumgrana_api
+		pumgrana_api		\
+		readability
 
 one_all = for dir in $(DIRECTORIES) ; do $(1) $$dir ; done
 
