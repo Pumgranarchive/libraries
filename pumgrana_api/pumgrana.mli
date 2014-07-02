@@ -14,7 +14,7 @@ val set_pumgrana_api_uri : uri -> unit
 (** {6 Contents}  *)
 
 val get_content_detail : uri ->
-  (uri * string * string * string option) Lwt.t
+  (uri * string * string * string) Lwt.t
 
 val get_contents : ?filter:filter -> ?tags_uri:uri list -> unit ->
   (uri * string * string) list Lwt.t

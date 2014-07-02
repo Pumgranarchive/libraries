@@ -34,9 +34,9 @@ let get_content json_content =
     let uri = member "uri" json_content in
     let title = member "title" json_content in
     let summary = member "summary" json_content in
-    let body = opt_member "body" json_content in
+    let body = member "body" json_content in
     Ptype.uri_of_string (to_string uri),
-    to_string title, to_string summary, map to_string body
+    to_string title, to_string summary, to_string body
   with
   | e -> print_endline (Printexc.to_string e);
     raise (Bad_format  "Bad content format")
