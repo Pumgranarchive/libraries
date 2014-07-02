@@ -7,7 +7,8 @@ ML :=		yojson_wrap.ml		\
 		youtube_http.ml		\
 		bot.ml
 
-MLI :=		youtube_http.mli
+MLI :=		youtube_http.mli	\
+		freebase_http.mli
 
 
 PACKAGES :=	lwt,cohttp,cohttp.lwt,yojson,str
