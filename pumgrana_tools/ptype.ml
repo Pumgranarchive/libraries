@@ -9,7 +9,7 @@ type type_name = Link | Content
 let uri_of_string uri =
   let _ =
     try
-      let regexp = Str.regexp "^http://" in
+      let regexp = Str.regexp "^https?://" in
       Str.search_forward regexp uri 0
     with Not_found -> raise (Invalid_uri uri)
   in

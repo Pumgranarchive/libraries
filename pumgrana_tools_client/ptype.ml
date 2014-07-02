@@ -71,7 +71,9 @@ let slash_decode url =
 let uri_of_string str =
   let _ =
     try search_forward ~start:true "http://" str 0
-    with Not_found -> raise (Invalid_uri str)
+    with Not_found ->
+      try search_forward ~start:true "https://" str 0
+      with Not_found -> raise (Invalid_uri str)
   in
   str
 
