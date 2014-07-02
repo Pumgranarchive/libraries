@@ -186,5 +186,5 @@ let search_video request max_result =
   let get_id_from_video (id, _, _, _, _) = id in
   lwt youtube_json = Http_request_manager.request ~display_body:false url in
   let videos = videos_of_json youtube_json in
-  let ids = (List.map get_id_from_url (List.map get_id_from_video videos)) in
+  let ids = (List.map get_id_from_video videos) in
   get_videos_from_ids ids
