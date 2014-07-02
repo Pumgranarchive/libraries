@@ -10,7 +10,7 @@ type sliced_description = string
 type topic_ids = string list
 type relevant_topic_ids = string list
 type categories = (topic_ids * relevant_topic_ids)
-type video = (title * url * sliced_description * categories)
+type video = (id * title * url * sliced_description * categories)
 
 (*** Constructors ***)
 val get_id_from_url     : string -> id

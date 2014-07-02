@@ -25,6 +25,3 @@ open Yojson.Basic
 lwt _ =
   lwt freebase_results = Freebase_http.get_topics "/m/0ndwt2w" in
   Lwt.return (Freebase_http.print_freebase_object freebase_results)
-  (* Lwt.return () *)
-
-(* NineMuses: /m/0g9tjtf *)

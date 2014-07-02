@@ -21,7 +21,7 @@ type sliced_description = string
 type topic_ids = string list
 type relevant_topic_ids = string list
 type categories = (topic_ids * relevant_topic_ids)
-type video = (title * url * sliced_description * categories)
+type video = (id * title * url * sliced_description * categories)
 
 (*
 ** PRIVATE
@@ -35,7 +35,7 @@ let g_youtube_api_key = "AIzaSyBlcjTwKF9UmOqnnExTZGgdY9nwS_0C5A8"
 let g_api_base_url = "https://www.googleapis.com/youtube/v3/"
 let g_video_base_url = "https://www.youtube.com/watch?v="
 
-(*** Url constructor ***)
+(*** Url creators ***)
 let create_youtube_search_url query parts fields max_results type_of_result =
   g_api_base_url ^ "search"
   ^ "?type=" ^ type_of_result
@@ -89,14 +89,11 @@ let get_relevantTopicIds_field json =
 
 (*** Unclassed ***)
 let videos_of_json json =
-  let get_video_url item =
+  let get_video_id item =
     let item_id = get_id_field item in
-    let get_url_from_assoc assoc =
-      g_video_base_url ^ get_videoId_field assoc
-    in
     match item_id with
     | `String s -> s
-    | `Assoc a -> get_url_from_assoc item_id
+    | `Assoc a -> get_videoId_field item_id
     | _   -> "Unable to find url"
   in
   let get_categories item =
@@ -107,12 +104,13 @@ let videos_of_json json =
   in
   let create_video item =
     let snippet = get_snippet_field item in
-    let url = get_video_url item in
+    let id = get_video_id item in
+    let url = g_video_base_url ^ id in
     let description =
       Bfy_helpers.reduce_string (get_description_field snippet) 50 in
     let categories = get_categories item
     in
-    (get_title_field snippet, url, description, categories)
+    (id, get_title_field snippet, url, description, categories)
   in
   List.map create_video (get_items_field json)
 
@@ -140,7 +138,7 @@ let get_id_from_url url =
 
 (*** Printing ***)
 (** Print a video on stdout *)
-let print_youtube_video (title, url, description, categories) =
+let print_youtube_video (id, title, url, description, categories) =
   let string_of_categories (topic_ids, relevant_topic_ids) =
     let rec aux = function
       | h::t    -> "\n    -" ^ h ^ (aux t)
@@ -151,7 +149,8 @@ let print_youtube_video (title, url, description, categories) =
   in
   print_endline (
     "<== Video ==>\n"
-    ^"->Title:\"" ^ title ^ "\"\n"
+    ^"->Id:\"" ^ id ^ "\"\n"
+    ^ "->Title:\"" ^ title ^ "\"\n"
     ^ "->Url:\"" ^ url ^ "\"\n"
     ^ "->Description:\"" ^ description ^ "\"\n"
     ^ "->Categories:" ^ (string_of_categories categories) ^ "\n")
@@ -184,8 +183,8 @@ let search_video request max_result =
       (string_of_int max_result)
       "video"
   in
-  let get_url_from_video (_, url, _, _) = url in
+  let get_id_from_video (id, _, _, _, _) = id in
   lwt youtube_json = Http_request_manager.request ~display_body:false url in
   let videos = videos_of_json youtube_json in
-  let ids = (List.map get_id_from_url (List.map get_url_from_video videos)) in
+  let ids = (List.map get_id_from_url (List.map get_id_from_video videos)) in
   get_videos_from_ids ids
