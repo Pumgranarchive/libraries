@@ -10,24 +10,14 @@ module Yojson = Yojson.Basic
 *******************************************************************************)
 
 let readbility_uri = "https://www.readability.com/api/content/v1/parser"
-let token_file = "token"
 let token = ref ""
 
 (******************************************************************************
 ********************************** Tools **************************************
 *******************************************************************************)
 
-let get_token () =
-  let ic = open_in token_file in
-  try
-    let token = input_line ic in
-    close_in ic;
-    token
-  with e ->
-    close_in_noerr ic;
-    raise Not_found
-
-let _ = token := get_token ()
+let set_token str =
+  token := str
 
 (******************************************************************************
 ********************************* Binding *************************************
