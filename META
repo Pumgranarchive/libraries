@@ -1,5 +1,5 @@
 name="bfy"
-description="Pumgrana binding of freebase and youtube API"
+description="Freebase and Youtube API bindings for Pumgrana"
 version="0.1"
 depends="lwt,cohttp,cohttp.lwt,yojson,str"
-archive(byte)="tools.cma"
+archive(byte)="bfy.cma"
