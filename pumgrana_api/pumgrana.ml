@@ -20,6 +20,7 @@ let content_detail_uri = content_uri ^ "detail/"
 let contents_uri = content_uri ^ "list_content/"
 let content_insert_uri = content_uri ^ "insert"
 let content_update_uri = content_uri ^ "update"
+let content_update_tags_uri = content_uri ^ "update_tags"
 let content_delete_uri = content_uri ^ "delete"
 
 let tag_uri = "tag/"
@@ -96,7 +97,6 @@ let base_headers () =
 let get uri parameters =
   let headers = base_headers () in
   let uri = !pumgrana_api_uri ^ uri ^ parameters in
-  print_endline uri;
   let uri = Uri.of_string uri in
   lwt header, body = Cohttp_lwt_unix.Client.get ~headers uri in
   lwt body_string = Cohttp_lwt_body.to_string body in
@@ -109,14 +109,11 @@ let post_headers content_length =
 
 let post uri json =
   let data = Yojson.to_string json in
-  print_endline data;
   let headers = post_headers (String.length data) in
   let uri = Uri.of_string (!pumgrana_api_uri ^ uri) in
-  print_endline (Uri.to_string uri);
   let body = ((Cohttp.Body.of_string data) :> Cohttp_lwt_body.t) in
   lwt h, body = Cohttp_lwt_unix.Client.post ~body ~chunked:false ~headers uri in
   lwt body_string = Cohttp_lwt_body.to_string body in
-  print_endline body_string;
   Lwt.return (Yojson.from_string body_string)
 
 (******************************************************************************
@@ -153,6 +150,14 @@ let update_content uri ?title ?summary ?body ?tags_uri () =
                        ["content_uri", json_of_uri uri]))))
   in
   lwt _ = post content_update_uri json in
+  Lwt.return ()
+
+let update_content_tags uri tags_uri =
+  let json =
+    `Assoc [("tags_uri", json_of_uris tags_uri);
+            ("content_uri", json_of_uri uri)]
+  in
+  lwt _ = post content_update_tags_uri json in
   Lwt.return ()
 
 let delete_contents uris =

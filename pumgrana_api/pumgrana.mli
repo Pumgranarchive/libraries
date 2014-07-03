@@ -25,6 +25,8 @@ val insert_content : string -> string -> string ->
 val update_content : uri -> ?title:string -> ?summary:string ->
   ?body:string -> ?tags_uri:uri list -> unit -> unit Lwt.t
 
+val update_content_tags : uri -> uri list -> unit Lwt.t
+
 val delete_contents : uri list -> unit Lwt.t
 
 (** {6 Tags}  *)
