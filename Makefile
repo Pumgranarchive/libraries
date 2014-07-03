@@ -4,7 +4,9 @@ ML :=		yojson_wrap.ml		\
 		bfy_helpers.ml		\
 		http_request_manager.ml	\
 		freebase_http.ml	\
-		youtube_http.ml		\
+		youtube_http.ml
+
+ML_EXEC :=	$(ML)			\
 		bot.ml
 
 MLI :=		youtube_http.mli	\
@@ -13,7 +15,7 @@ MLI :=		youtube_http.mli	\
 
 PACKAGES :=	lwt,cohttp,cohttp.lwt,yojson,str
 
-CMX :=		$(ML:.ml=.cmx)
+CMX :=		$(ML_EXEC:.ml=.cmx)
 CMO :=		$(ML:.ml=.cmo)
 CMI :=		$(MLI:.mli=.cmi)
 LIB :=		-package $(PACKAGES)
