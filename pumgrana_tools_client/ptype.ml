@@ -68,6 +68,8 @@ let slash_decode url =
 *********************************** Type **************************************
 *******************************************************************************)
 
+let compare_uri = String.compare
+
 let uri_of_string str =
   let _ =
     try search_forward ~start:true "http://" str 0

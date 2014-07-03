@@ -6,6 +6,8 @@ type link_id = uri * uri
 type filter = Most_recent | Most_used | Most_view
 type type_name = Link | Content
 
+let compare_uri = Rdf_uri.compare
+
 let uri_of_string uri =
   let _ =
     try

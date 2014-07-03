@@ -11,6 +11,8 @@ type link_id
 type filter = Most_recent | Most_used | Most_view
 type type_name = Link | Content
 
+val compare_uri : uri -> uri -> int
+
 (** Create a URI from a string.
     @raise Invalid_uri in case of the string does not represent an URI. *)
 val uri_of_string : string -> uri
