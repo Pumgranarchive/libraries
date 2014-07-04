@@ -1,0 +1,5 @@
+name="tidy"
+description="A Tidy ocaml binding"
+version="0.1"
+depends="lwt,lwt.unix,str"
+archive(byte)="tidy.cma"

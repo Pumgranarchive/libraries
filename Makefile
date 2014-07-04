@@ -2,7 +2,8 @@ DIRECTORIES :=	pumgrana_client_tools	\
 		pumgrana_tools		\
 		pumgrana_api		\
 		readability		\
-		freebase_youtube
+		freebase_youtube	\
+		tidy
 
 one_all = for dir in $(DIRECTORIES) ; do $(1) $$dir ; done
 
