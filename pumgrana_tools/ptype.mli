@@ -28,10 +28,10 @@ val link_id_of_string : string -> link_id
 val string_of_link_id : link_id -> string
 
 (** Encode all slash of the given string url  *)
-val slash_encode : string -> string
+val uri_encode : string -> string
 
 (** Decode all slash of the given string url  *)
-val slash_decode : string -> string
+val uri_decode : string -> string
 
 (** Create an string id from the given uri  *)
 val pumgrana_id_of_uri : string -> uri -> string

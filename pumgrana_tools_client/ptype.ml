@@ -45,24 +45,27 @@ let insert str p_start p_end str2 =
   let str3 = String.sub str p_end ((String.length str) - p_end) in
   str1 ^ str2 ^ str3
 
-let replace_all remove_str replace_str str =
-  let remove_length = String.length remove_str in
-  let rec aux str start =
-    try
-      let p = search_forward ~start:false remove_str str start in
-      let new_p = p - remove_length in
-      let new_url = insert str new_p p replace_str in
-      aux new_url new_p
-    with
-      Not_found -> str
+let replace remove_list replace_list str =
+  let aux str remove_str replace_str =
+    let remove_length = String.length remove_str in
+    let rec search_and_replace str start =
+      try
+        let p = search_forward ~start:false remove_str str start in
+        let new_p = p - remove_length in
+        let new_url = insert str new_p p replace_str in
+         search_and_replace new_url new_p
+      with
+        Not_found -> str
+    in
+    search_and_replace str 0
   in
-  aux str 0
+  List.fold_left2 aux str remove_list replace_list
 
-let slash_encode url =
-  replace_all "/" "%2F" url
+let uri_encode url =
+  replace ["/";":";"?";"=";"&"] ["%2F";"%3A";"%3F";"%3D";"%26"] url
 
-let slash_decode url =
-  replace_all "%2F" "/" url
+let uri_decode url =
+  replace ["%2F";"%3A";"%3F";"%3D";"%26"] ["/";":";"?";"=";"&"] url
 
 (******************************************************************************
 *********************************** Type **************************************

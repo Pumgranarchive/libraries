@@ -35,13 +35,18 @@ let link_id_of_string link_id =
   with e ->
     raise (Invalid_link_id (link_id ^ ": is not a valid link_id"))
 
-let slash_encode url =
-  let regexp = Str.regexp "/" in
-  Str.global_replace regexp "%2F" url
+let replace remove_list replace_list str =
+  let aux str remove_str replace_str =
+    let regexp = Str.regexp remove_str in
+    Str.global_replace regexp replace_str str
+  in
+  List.fold_left2 aux str remove_list replace_list
 
-let slash_decode url =
-  let regexp = Str.regexp "%2F" in
-  Str.global_replace regexp "/" url
+let uri_encode url =
+  replace ["/";":";"?";"=";"&"] ["%2F";"%3A";"%3F";"%3D";"%26"] url
+
+let uri_decode url =
+  replace ["%2F";"%3A";"%3F";"%3D";"%26"] ["/";":";"?";"=";"&"] url
 
 let pumgrana_id_of_uri base uri =
   let str = string_of_uri uri in
