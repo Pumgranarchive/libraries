@@ -45,10 +45,6 @@ let link_delete_uri = link_uri ^ "delete"
 let set_pumgrana_api_uri uri =
   pumgrana_api_uri := string_of_uri uri
 
-let slash_encode str =
-  let regexp = Str.regexp "/" in
-  Str.global_replace regexp "%2F" str
-
 let string_of_filter = function
   | Most_recent -> "MOST_RECENT"
   | Most_used   -> "MOST_USED"
@@ -60,8 +56,8 @@ let string_of_type_name = function
 
 let append str p =
   if String.length str == 0
-  then (slash_encode p)
-  else str ^ "/" ^ (slash_encode p)
+  then (uri_encode p)
+  else str ^ "/" ^ (uri_encode p)
 
 let map f = function
   | Some x -> Some (f x)
@@ -121,7 +117,7 @@ let post uri json =
 *******************************************************************************)
 
 let get_content_detail content_uri =
-  let parameter = string_of_uri content_uri in
+  let parameter = uri_encode (string_of_uri content_uri) in
   lwt json = get content_detail_uri parameter in
   Lwt.return (List.hd Pdeserialize.(get_service_return get_content_list json))
 
@@ -175,12 +171,12 @@ let tags_by_type type_name =
   Lwt.return (Pdeserialize.(get_service_return get_tag_list json))
 
 let tags_from_content content_uri =
-  let parameter = string_of_uri content_uri in
+  let parameter = uri_encode (string_of_uri content_uri) in
   lwt json = get tag_content_uri parameter in
   Lwt.return (Pdeserialize.(get_service_return get_tag_list json))
 
 let tags_from_content_links content_uri =
-  let parameter = string_of_uri content_uri in
+  let parameter = uri_encode (string_of_uri content_uri) in
   lwt json = get tag_content_links_uri parameter in
   Lwt.return (Pdeserialize.(get_service_return get_tag_list json))
 
@@ -207,7 +203,7 @@ let get_link_detail link_id =
   Lwt.return (List.hd Pdeserialize.(get_service_return get_detail_link_list json))
 
 let links_from_content content_uri =
-  let parameter = string_of_uri content_uri in
+  let parameter = uri_encode (string_of_uri content_uri) in
   lwt json = get link_content_uri parameter in
   Lwt.return (Pdeserialize.(get_service_return get_link_list json))
 
