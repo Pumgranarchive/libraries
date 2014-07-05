@@ -52,7 +52,7 @@ val links_from_content : uri ->
 val links_from_content_tags : uri -> uri list ->
   (link_id * uri * string * string) list Lwt.t
 
-val insert_links : (uri * uri * uri list) list -> uri list Lwt.t
+val insert_links : (uri * uri * uri list) list -> link_id list Lwt.t
 
 val update_links : (link_id * uri list) list -> unit Lwt.t
 
