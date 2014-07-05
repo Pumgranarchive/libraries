@@ -1,7 +1,9 @@
+VPATH =		../pumgrana_common_tools
+
 NAME :=		ptools
 
-ML :=		pjson.ml		\
-		ptype.ml		\
+ML :=		pjson.ml	\
+		ptype.ml	\
 		pdeserialize.ml
 
 MLI :=		ptype.mli
@@ -26,10 +28,10 @@ all:		$(NAME) lib
 
 re:		clean all
 
-$(NAME):	.depend $(CMI) $(CMX)
+$(NAME):	$(CMI) $(CMX)
 		$(OCAMLOPT) -linkpkg $(CMX) -o $@
 
-lib:		.depend $(CMI) $(CMO)
+lib:		$(CMI) $(CMO)
 		$(OCAMLC) -a $(CMO) -o $(NAME).cma
 
 install:	$(CMI) $(CMX) $(CMO) lib
@@ -42,20 +44,20 @@ reinstall:	re uninstall install
 
 .SUFFIXES:	.ml .mli .cmo .cmi .cmx
 
-.ml.cmx:
-		$(OCAMLOPT) -c $<
+%.cmx:		%.ml
+		$(OCAMLOPT) -c $< -o $(patsubst $(VPATH)/%,%,$@)
 
-.ml.cmo:
-		$(OCAMLC) -c $<
+%.cmo:		%.ml
+		$(OCAMLC) -c $< -o $(patsubst $(VPATH)/%,%,$@)
 
-.mli.cmi:
-		$(OCAMLC) -c $<
+%.cmi:		%.mli
+		$(OCAMLC) -c $< -o $(patsubst $(VPATH)/%,%,$@)
 
 clean:
 		@$(RM) *.cm[iox] *.o
 		@$(RM) $(NAME) $(NAME).cma
 
-.depend:
-		$(OCAMLDEP) $(MLI) $(ML) > .depend
+# .depend:
+# 		$(OCAMLDEP) $(MLI) $(ML) > .depend
 
-include .depend
+# include .depend
