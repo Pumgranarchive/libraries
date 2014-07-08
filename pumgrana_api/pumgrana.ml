@@ -94,7 +94,10 @@ let get uri parameters =
   let headers = base_headers () in
   let uri = !pumgrana_api_uri ^ uri ^ parameters in
   let uri = Uri.of_string uri in
-  lwt header, body = Cohttp_lwt_unix.Client.get ~headers uri in
+  lwt header, body =
+    try Cohttp_lwt_unix.Client.get ~headers uri
+    with e -> (print_endline (Printexc.to_string e); raise e)
+  in
   lwt body_string = Cohttp_lwt_body.to_string body in
   Lwt.return (Yojson.from_string body_string)
 
@@ -108,9 +111,13 @@ let post uri json =
   let headers = post_headers (String.length data) in
   let uri = Uri.of_string (!pumgrana_api_uri ^ uri) in
   let body = ((Cohttp.Body.of_string data) :> Cohttp_lwt_body.t) in
-  lwt h, body = Cohttp_lwt_unix.Client.post ~body ~chunked:false ~headers uri in
+  lwt h, body =
+    try Cohttp_lwt_unix.Client.post ~body ~chunked:false ~headers uri
+    with e -> (print_endline (Printexc.to_string e); raise e)
+  in
   lwt body_string = Cohttp_lwt_body.to_string body in
   Lwt.return (Yojson.from_string body_string)
+
 
 (******************************************************************************
 ********************************* Content *************************************
@@ -222,9 +229,10 @@ let insert_links links =
             ("target_uri", json_of_uri target_uri);
             ("tags_uri", json_of_uris tags_uri)]
   in
-  let json = `Assoc [("data", `List (List.map json_of_links links))] in
+  let json = `List (List.map json_of_links links) in
+  let json = `Assoc [("data", json)] in
   lwt json = post link_insert_uri json in
-    Lwt.return (Pdeserialize.get_links_uri_return json)
+  Lwt.return (Pdeserialize.get_links_uri_return json)
 
 let update_links links =
   let json_of_links (link_uri, tags_uri) =

@@ -92,7 +92,7 @@ let get_tag json_tag =
 let get_links_uri_return json_tag =
   try
     let uris = to_list (member "links_uri" json_tag) in
-    List.map (fun x -> Ptype.uri_of_string (to_string (member "uri" x))) uris
+    List.map (fun x -> Ptype.link_id_of_string (to_string (member "uri" x))) uris
   with
   | e -> print_endline (Printexc.to_string e);
     raise (Bad_format  "Bad links_uri format")
