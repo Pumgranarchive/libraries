@@ -21,6 +21,7 @@ type sliced_description = string
 type topic_ids = string list
 type relevant_topic_ids = string list
 type categories = (topic_ids * relevant_topic_ids)
+
 type video = (id * title * url * sliced_description * categories)
 
 (*
@@ -36,7 +37,7 @@ let g_api_base_url = "https://www.googleapis.com/youtube/v3/"
 let g_video_base_url = "https://www.youtube.com/watch?v="
 
 (*** Url creators ***)
-let create_youtube_search_url query parts fields max_results type_of_result =
+let create_search_url query parts fields max_results type_of_result =
   g_api_base_url ^ "search"
   ^ "?type=" ^ type_of_result
   ^ "&part=" ^ parts
@@ -45,12 +46,37 @@ let create_youtube_search_url query parts fields max_results type_of_result =
   ^ "&q=" ^ query
   ^ "&key=" ^ g_youtube_api_key
 
-let create_youtube_video_url video_ids parts fields =
+let create_video_url video_ids parts fields =
   g_api_base_url
   ^ "videos?id=" ^ (Bfy_helpers.strings_of_list video_ids ",")
   ^ "&part=" ^ parts
   ^ "&fields=" ^ fields
   ^ "&key=" ^ g_youtube_api_key
+
+let create_playlist_item_url playlist_id max_results parts fields =
+  g_api_base_url
+  ^ "playlistItems?playlistId=" ^ playlist_id
+  ^ "&maxResults=" ^ max_results
+  ^ "&part=" ^ parts
+  ^ "&fields=" ^ fields
+  ^ "&key=" ^ g_youtube_api_key
+
+let create_channel_url_from_id id parts fields =
+  g_api_base_url
+  ^ "channels" ^ "?id=" ^ (Bfy_helpers.strings_of_list id ",")
+  ^ "&part=" ^ parts
+  ^ "&fields=" ^ fields
+  ^ "&key=" ^ g_youtube_api_key
+
+(* let create_channel_url_from_name name parts fields = *)
+(*   g_api_base_url *)
+(*   ^ "channels" ^ "?forUsername=" ^ name *)
+(*   ^ "&part=" ^ parts *)
+(*   ^ "&fields=" ^ fields *)
+(*   ^ "&key=" ^ g_youtube_api_key *)
+
+
+
 
 (*** json accessors ***)
 let get_items_field json =
@@ -86,6 +112,24 @@ let get_relevantTopicIds_field json =
   List.map
     Yojson_wrap.to_string
     (Yojson_wrap.to_list (Yojson_wrap.member "relevantTopicIds" json))
+
+(* channel fields *)
+let get_contentDetails_field json =
+  Yojson_wrap.member "contentDetails" json
+
+let get_relatedPlaylists_field json =
+  Yojson_wrap.member "relatedPlaylists" json
+
+let get_uploads_field json =
+  Yojson_wrap.to_string (Yojson_wrap.member "uploads" json)
+
+let get_statistics_field json =
+  Yojson_wrap.member "statistics" json
+
+let get_videoCount_field json =
+  Yojson_wrap.to_string (Yojson_wrap.member "videoCount" json)
+
+
 
 (*** Unclassed ***)
 let videos_of_json json =
@@ -162,7 +206,7 @@ let print_youtube_video (id, title, url, description, categories) =
 *)
 let get_videos_from_ids video_ids =
   let youtube_url_http =
-    create_youtube_video_url
+    create_video_url
       video_ids
       "snippet,topicDetails"
       "items(id,snippet(title,description),topicDetails)" in
@@ -176,7 +220,7 @@ let get_videos_from_ids video_ids =
 *)
 let search_video request max_result =
   let url =
-    create_youtube_search_url
+    create_search_url
       request
       "snippet"
       "items(id,snippet(title,description))"
@@ -188,3 +232,42 @@ let search_video request max_result =
   let videos = videos_of_json youtube_json in
   let ids = (List.map get_id_from_video videos) in
   get_videos_from_ids ids
+
+
+(**
+** return a list of video from an id
+*)
+(* TODO max_result must accept value > 50 *)
+let get_videos_from_playlist_id playlist_id max_result =
+  let youtube_url_http =
+    let max_result = if max_result > 50 then 50 else max_result
+    in
+    create_playlist_item_url
+      playlist_id
+      (string_of_int max_result)
+      "contentDetails"
+      "items(contentDetails(videoId))"
+  in
+  let get_id item = get_videoId_field (get_contentDetails_field item)
+  in
+  lwt youtube_json = Http_request_manager.request ~display_body:false youtube_url_http in
+  let ids = List.map get_id (get_items_field youtube_json) in
+  get_videos_from_ids ids
+
+
+(**
+** return a list of video from a channel id or username
+*)
+(* TODO: ids must be a list *)
+let get_uploaded_videos_from_channel_ids ids =
+  let youtube_url_http =
+    create_channel_url_from_id
+      ids
+      "contentDetails,statistics"
+      "items(contentDetails(relatedPlaylists(uploads)),statistics(videoCount))" in
+  lwt youtube_json = Http_request_manager.request ~display_body:false youtube_url_http in
+  let item = List.hd(get_items_field youtube_json) in
+  let content_details = (get_contentDetails_field item) in
+  let playlist_id = get_uploads_field (get_relatedPlaylists_field content_details) in
+  let video_count = get_videoCount_field (get_statistics_field item) in
+  get_videos_from_playlist_id playlist_id (int_of_string video_count)

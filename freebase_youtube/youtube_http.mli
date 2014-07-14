@@ -19,7 +19,9 @@ val get_id_from_url     : string -> id
 val print_youtube_video : video -> unit
 
 (*** Requests ***)
-val get_videos_from_ids   : id list -> video list Lwt.t
-val search_video        : string -> int -> video list Lwt.t
+val get_videos_from_ids                         : id list -> video list Lwt.t
+val search_video                                : string -> int -> video list Lwt.t
 
+val get_videos_from_playlist_id                 : string -> int -> video list Lwt.t
+val get_uploaded_videos_from_channel_ids        : string list -> video list Lwt.t
 
