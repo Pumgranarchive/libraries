@@ -115,6 +115,7 @@ let freebase_object_of_json json =
 *)
 
 (*** printing ***)
+(** Print a basic freebase object on stdout *)
 let print_freebase_object
     (id, name, sliced_description, sm_presences, types, wiki_url) =
   let rec string_of_sm = function
@@ -135,6 +136,7 @@ let print_freebase_object
 
 
 (*** requests ***)
+(* for now it is private, this function isn't finished *)
 let search query =
   let url = create_search_url query in
   lwt freebase_json = Http_request_manager.request url
@@ -142,6 +144,9 @@ let search query =
   Lwt.return (freebase_json)
 
 (* TODO: ids must become a list *)
+(**
+** return a list of freebase basic object from a list of topic_ids
+*)
 let get_topics ids =
   let url =
     create_topic_url
