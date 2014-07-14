@@ -12,7 +12,7 @@ exception Bad_youtube_url of string
 ** Types
 *)
 (* private *)
-type id = string
+type video_id = string
 
 (* public *)
 type title = string
@@ -22,7 +22,7 @@ type topic_ids = string list
 type relevant_topic_ids = string list
 type categories = (topic_ids * relevant_topic_ids)
 
-type video = (id * title * url * sliced_description * categories)
+type video = (video_id * title * url * sliced_description * categories)
 
 (*
 ** PRIVATE
@@ -175,7 +175,7 @@ let videos_of_json json =
 (*** Constructors ***)
 (** create an id from a youtube url.
     An exception will be raised if the url is not correct *)
-let get_id_from_url url =
+let get_video_id_from_url url =
   (* README: Changing "uri_reg" may change the behavior of "extract_id url" because of "Str.group_end n"*)
   let uri_reg =
     Str.regexp "\\(https?://\\)?\\(www\\.\\)?youtu\\(\\.be/\\|be\\.com/\\)\\(\\(.+/\\)?\\(watch\\(\\?v=\\|.+&v=\\)\\)?\\(v=\\)?\\)\\([-A-Za-z0-9_]\\)*\\(&.+\\)?" in
