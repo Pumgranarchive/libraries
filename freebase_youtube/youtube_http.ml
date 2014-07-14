@@ -53,9 +53,14 @@ let create_video_url video_ids parts fields =
   ^ "&fields=" ^ fields
   ^ "&key=" ^ g_youtube_api_key
 
-let create_playlist_item_url playlist_id max_results parts fields =
+let create_playlist_item_url playlist_id ?(page_token = None) max_results parts fields  =
+  let page_token = match page_token with
+    | Some s            -> "&pageToken=" ^ s
+    | None              -> ""
+  in
   g_api_base_url
   ^ "playlistItems?playlistId=" ^ playlist_id
+  ^ page_token
   ^ "&maxResults=" ^ max_results
   ^ "&part=" ^ parts
   ^ "&fields=" ^ fields
@@ -79,6 +84,9 @@ let create_channel_url_from_id id parts fields =
 
 
 (*** json accessors ***)
+let get_nextPageToken_field json =
+  Yojson_wrap.to_string (Yojson_wrap.member "nextPageToken" json)
+
 let get_items_field json =
   Yojson_wrap.to_list (Yojson_wrap.member "items" json)
 
@@ -128,6 +136,8 @@ let get_statistics_field json =
 
 let get_videoCount_field json =
   Yojson_wrap.to_string (Yojson_wrap.member "videoCount" json)
+
+
 
 
 
@@ -237,22 +247,28 @@ let search_video request max_result =
 (**
 ** return a list of video from an id
 *)
-(* TODO max_result must accept value > 50 *)
 let get_videos_from_playlist_id playlist_id max_result =
-  let youtube_url_http =
-    let max_result = if max_result > 50 then 50 else max_result
+  let get_id item = get_videoId_field (get_contentDetails_field item) in
+  let rec aux playlist_id ?(page_token = None) max_result =
+    let (max_result, next_max_result) =
+      if max_result > 50 then (50, max_result - 50) else (max_result, 0) in
+    let youtube_url_http =
+      create_playlist_item_url
+        playlist_id
+        ~page_token:page_token
+        (string_of_int max_result)
+        "id,contentDetails,snippet"
+        "nextPageToken,items(contentDetails(videoId),snippet(position))"
     in
-    create_playlist_item_url
-      playlist_id
-      (string_of_int max_result)
-      "contentDetails"
-      "items(contentDetails(videoId))"
+    lwt youtube_json = Http_request_manager.request ~display_body:false youtube_url_http in
+    let next_page_token = get_nextPageToken_field youtube_json in
+    lwt ids = get_videos_from_ids (List.map get_id (get_items_field youtube_json)) in
+    if next_max_result = 0 || next_page_token = ""
+    then (Lwt.return ids)
+    else (lwt new_ids = aux playlist_id (~page_token:(Some next_page_token)) next_max_result in Lwt.return (ids@new_ids))
   in
-  let get_id item = get_videoId_field (get_contentDetails_field item)
-  in
-  lwt youtube_json = Http_request_manager.request ~display_body:false youtube_url_http in
-  let ids = List.map get_id (get_items_field youtube_json) in
-  get_videos_from_ids ids
+  aux playlist_id max_result
+
 
 
 (**
