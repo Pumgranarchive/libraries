@@ -54,10 +54,8 @@ let create_video_url video_ids parts fields =
   ^ "&key=" ^ g_youtube_api_key
 
 let create_playlist_item_url playlist_id ?(page_token = None) max_results parts fields  =
-  let page_token = match page_token with
-    | Some s            -> "&pageToken=" ^ s
-    | None              -> ""
-  in
+  let page_token =
+    match page_token with Some s -> ("&pageToken=" ^ s) | None -> "" in
   g_api_base_url
   ^ "playlistItems?playlistId=" ^ playlist_id
   ^ page_token
@@ -66,22 +64,18 @@ let create_playlist_item_url playlist_id ?(page_token = None) max_results parts 
   ^ "&fields=" ^ fields
   ^ "&key=" ^ g_youtube_api_key
 
-let create_channel_url_from_id id parts fields =
+let create_channel_url_from_id ?(id = None) ?(user_name = None) parts fields =
+  let id =
+    match id with Some ids -> ("?id=" ^ (Bfy_helpers.strings_of_list (ids) ",")) | None -> "" in
+  let user_name =
+    match user_name with Some name -> ("?forUsername=" ^ name) | None -> "" in
   g_api_base_url
-  ^ "channels" ^ "?id=" ^ (Bfy_helpers.strings_of_list id ",")
+  ^ "channels"
+  ^ id
+  ^ user_name
   ^ "&part=" ^ parts
   ^ "&fields=" ^ fields
   ^ "&key=" ^ g_youtube_api_key
-
-(* let create_channel_url_from_name name parts fields = *)
-(*   g_api_base_url *)
-(*   ^ "channels" ^ "?forUsername=" ^ name *)
-(*   ^ "&part=" ^ parts *)
-(*   ^ "&fields=" ^ fields *)
-(*   ^ "&key=" ^ g_youtube_api_key *)
-
-
-
 
 (*** json accessors ***)
 let get_nextPageToken_field json =
@@ -136,9 +130,6 @@ let get_statistics_field json =
 
 let get_videoCount_field json =
   Yojson_wrap.to_string (Yojson_wrap.member "videoCount" json)
-
-
-
 
 
 (*** Unclassed ***)
@@ -270,15 +261,19 @@ let get_videos_from_playlist_id playlist_id max_result =
   aux playlist_id max_result
 
 
-
 (**
 ** return a list of video from a channel id or username
 *)
-(* TODO: ids must be a list *)
-let get_uploaded_videos_from_channel_ids ids =
+(* NOTE: this function is private and can't be moved in private section *)
+(* TODO:
+** - remove List.hd and process all channels
+** - add max_result based on number channel expected
+*)
+let get_uploaded_videos_from_channel ids user_name =
   let youtube_url_http =
     create_channel_url_from_id
-      ids
+      ~id:ids
+      ~user_name:user_name
       "contentDetails,statistics"
       "items(contentDetails(relatedPlaylists(uploads)),statistics(videoCount))" in
   lwt youtube_json = Http_request_manager.request ~display_body:false youtube_url_http in
@@ -287,3 +282,10 @@ let get_uploaded_videos_from_channel_ids ids =
   let playlist_id = get_uploads_field (get_relatedPlaylists_field content_details) in
   let video_count = get_videoCount_field (get_statistics_field item) in
   get_videos_from_playlist_id playlist_id (int_of_string video_count)
+
+let get_uploaded_videos_from_channel_ids ids =
+  get_uploaded_videos_from_channel (Some ids) None
+
+let get_uploaded_videos_from_user_name user_name =
+  get_uploaded_videos_from_channel None (Some user_name)
+

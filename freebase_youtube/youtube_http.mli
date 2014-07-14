@@ -24,4 +24,5 @@ val search_video                                : string -> int -> video list Lw
 
 val get_videos_from_playlist_id                 : string -> int -> video list Lwt.t
 val get_uploaded_videos_from_channel_ids        : string list -> video list Lwt.t
+val get_uploaded_videos_from_user_name          : string -> video list Lwt.t
 

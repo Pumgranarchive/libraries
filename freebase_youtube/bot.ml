@@ -33,6 +33,11 @@ lwt  _ =
   Lwt.return (List.map Youtube_http.print_youtube_video tamer)
 
 (* lwt  _ = *)
+(*   lwt tamer = Youtube_http.get_uploaded_videos_from_user_name "NormanFaitDesVideos" *)
+(*   in *)
+(*   Lwt.return (List.map Youtube_http.print_youtube_video tamer) *)
+
+(* lwt  _ = *)
 (*   lwt tamer = Youtube_http.get_videos_from_playlist_id "UUww2zZWg4Cf5xcRKG-ThmXQ" 51 *)
 (*   in *)
 (*   Lwt.return (List.map Youtube_http.print_youtube_video tamer) *)
