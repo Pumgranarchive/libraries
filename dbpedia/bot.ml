@@ -1,51 +1,6 @@
 
-let get_basic_informations =
 
-"PREFIX dbpedia-owl: <http://dbpedia.org/ontology/>
-PREFIX dbres: <http://dbpedia.org/resource/>
-PREFIX dbprop: <http://dbpedia.org/property/>
-PREFIX owl: <http://www.w3.org/2002/07/owl#>
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-
-SELECT DISTINCT ?title ?abstract ?type ?wikiPage ?isPrimaryTopicOf ?label ?sameAs
-WHERE
-{
-
- {
-   dbres:Rhapsody_of_Fire dbprop:name ?title.
-   FILTER (lang(?title) = '' || lang(?title) = 'en')
- }
- UNION
- {
-   dbres:Rhapsody_of_Fire dbpedia-owl:abstract ?abstract.
-   FILTER (lang(?abstract) = '' || lang(?abstract) = 'en')
- }
- UNION
- {
-   dbres:Rhapsody_of_Fire rdf:type ?type.
- }
- UNION
- {
-   dbres:Rhapsody_of_Fire dbpedia-owl:wikiPageID ?wikiPage.
- }
- UNION
- {
-   dbres:Rhapsody_of_Fire foaf:isPrimaryTopicOf ?isPrimaryTopicOf.
- }
- UNION
- {
-   dbres:Rhapsody_of_Fire rdfs:label ?label.
-   FILTER (lang(?label) = '' || lang(?label) = 'en')
- }
- UNION
- {
-   dbres:Rhapsody_of_Fire owl:sameAs ?sameAs.
- }
-
-}
-limit 1000"
+(* let get_basic_informations = *)
 
 (* "PREFIX dbpedia-owl: <http://dbpedia.org/ontology/> *)
 (* PREFIX dbres: <http://dbpedia.org/resource/> *)
@@ -77,6 +32,16 @@ limit 1000"
 (* } *)
 (* " *)
 
+type title = string
+type abstract = string
+type rdf_type = string list
+type wiki_page = string
+type is_primary_topic_of = string
+type label = string
+type same_as = string list
+
+type basic = (title * abstract * rdf_type * wiki_page * is_primary_topic_of * label * same_as)
+
 let query uri q =
   let mes =
     {
@@ -101,67 +66,53 @@ let query uri q =
   | _                            -> failwith ("No retuls"))
 
 
-(* let print_sol sol = *)
-(*   let print varname term = *)
-(*     Printf.printf "%s => %s\n" varname (Rdf_term.string_of_term term) *)
-(*   in *)
-(*   Rdf_sparql.solution_iter print sol ; *)
-(*   print_newline() *)
+let pairs_of_solutions solutions keys =
+  let get_pair solution =
+    let predicat elem = Rdf_sparql.is_bound solution elem in
+    let key = List.find predicat keys in
+    (key, (Rdf_term.string_of_term (Rdf_sparql.get_term solution key)))
+  in
+  (* let map func list = *)
+  (*   let rec aux final_list = function *)
+  (*     | h::t    -> aux ((func h)::final_list) t *)
+  (*     | _       -> final_list *)
+  (*   in *)
+  (*   aux [] list *)
+  (* in *)
+  List.map get_pair solutions
 
-let t_of_solutions solutions =
-  let print varname term =
-    Printf.printf "%s => %s\n" varname (Rdf_term.string_of_term term)
-  in
-  let iter solutions =
-    print_endline (string_of_bool (Rdf_sparql.is_bound solutions "sameAs"));
-    Rdf_sparql.solution_iter print solutions ;
-    print_newline()
-  in
-  let toto solution =
-    solution
-  in
-  let rdf_sparql_map func list =
-    let rec aux final_list = function
-      | h::t    -> aux ((func h)::final_list) t
-      | _       -> final_list
+
+let print_basic
+    (title,abstract,rdf_type,wiki_page,is_primary_topic_of,label,same_as) =
+  print_endline title;
+  print_endline abstract;
+  print_endline wiki_page;
+  print_endline is_primary_topic_of
+
+
+let get_basic_informations =
+  let basic_of_pair pairs =
+    let get_value key_to_find =
+      let is_key_equal (key, value) = (key = key_to_find)
+      in
+      let pair = List.find is_key_equal pairs in
+      let (key, value) = pair in
+      value
     in
-    aux [] list
+    let title = get_value "title" in
+    let abstract = get_value "abstract" in
+    let rdf_type = get_value "type" in
+    let wiki_page = get_value "wikiPage" in
+    let is_primary_topic_of = get_value "isPrimaryTopicOf" in
+    let label = get_value "label" in
+    let same_as = get_value "sameAs" in
+    (title,abstract,rdf_type,wiki_page,is_primary_topic_of,label,same_as)
   in
-  rdf_sparql_map toto solutions
+  lwt dbpedia_results = query
+      (Rdf_uri.uri "http://dbpedia.org/sparql") Dbpedia_query.(basic_informations.query) in
+  (* print_endline (string_of_int (List.length dbpedia_results)); *)
+  Lwt.return (basic_of_pair (pairs_of_solutions dbpedia_results Dbpedia_query.(basic_informations.keys)))
 
 lwt _ =
-  lwt dbpedia_results = query
-    (Rdf_uri.uri "http://dbpedia.org/sparql") get_basic_informations
-  in
-  print_endline (string_of_int (List.length dbpedia_results));
-  (* List.iter print_sol dbpedia_results; *)
-  t_of_solutions dbpedia_results;
-  Lwt.return ()
-
-
-
-(* lwt query_web =  Rdf_sparql_http_lwt.get *)
-(*   (Rdf_uri.uri "http://fr.dbpedia.org") *)
-(*   web_query_get_member_of_rhapsody *)
-
-(* (\* let solutions = match query_web with *\) *)
-(* (\*   | Rdf_sparql_http.Ok s        -> s *\) *)
-(* (\*   | Rdf_sparql_http.Error e     -> print_endline e; [] *\) *)
-
-(* (\* let print_sol = *\) *)
-(* (\*   let print varname term = *\) *)
-(* (\*     Printf.printf "%s => %s\n" varname (Rdf_term.string_of_term term) *\) *)
-(* (\*   in *\) *)
-(* (\*   fun sol -> *\) *)
-(* (\*     print_endline "Solution:"; *\) *)
-(* (\*     solution_iter print sol ; *\) *)
-(* (\*     print_newline();; *\) *)
-
-(* (\* let _ = *\) *)
-(* (\*   begin *\) *)
-(* (\*     print_endline "Printing solution..."; *\) *)
-(* (\*     List.iter print_sol solutions; *\) *)
-(* (\*     print_endline "...Done" *\) *)
-(* (\*   end *\) *)
-
-
+  lwt basic = get_basic_informations in
+  Lwt.return (print_basic basic)

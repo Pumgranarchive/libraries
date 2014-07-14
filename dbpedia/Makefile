@@ -1,11 +1,11 @@
 NAME :=		dbpedia
 
-ML :=		
+ML :=		dbpedia_query.ml
 
 ML_EXEC :=	$(ML)			\
 		bot.ml
 
-MLI :=		
+MLI :=		dbpedia_query.mli
 
 
 PACKAGES :=	lwt,cohttp,cohttp.lwt,rdf,rdf.lwt
