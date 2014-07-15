@@ -1,12 +1,14 @@
 NAME :=		dbpedia
 
 ML :=		dbpedia_query.ml	\
-		rdf_http.ml
+		rdf_http.ml		\
+		dbpedia_http.ml
 
 ML_EXEC :=	$(ML)			\
 		bot.ml
 
 MLI :=		dbpedia_query.mli	\
+		dbpedia_http.mli	\
 		rdf_http.mli
 
 
