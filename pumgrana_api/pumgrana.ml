@@ -95,13 +95,8 @@ let get uri parameters =
   let uri = !pumgrana_api_uri ^ uri ^ parameters in
   let uri = Uri.of_string uri in
   lwt header, body =
-<<<<<<< HEAD
     try Cohttp_lwt_unix.Client.get ~headers uri
     with e -> (print_endline (Printexc.to_string e); raise e)
-=======
-    try Cohttp_lwt_unix.Client.get ~headers uri in
-    with e -> print_endline (Printexc.to_string e); raise e
->>>>>>> 766d0b47c61f1ea129d1694eb0cf2ec7356d0b18
   in
   lwt body_string = Cohttp_lwt_body.to_string body in
   Lwt.return (Yojson.from_string body_string)
@@ -117,13 +112,8 @@ let post uri json =
   let uri = Uri.of_string (!pumgrana_api_uri ^ uri) in
   let body = ((Cohttp.Body.of_string data) :> Cohttp_lwt_body.t) in
   lwt h, body =
-<<<<<<< HEAD
     try Cohttp_lwt_unix.Client.post ~body ~chunked:false ~headers uri
     with e -> (print_endline (Printexc.to_string e); raise e)
-=======
-    try Cohttp_lwt_unix.Client.post ~body ~chunked:false ~headers uri in
-    with e -> print_endline (Printexc.to_string e); raise e
->>>>>>> 766d0b47c61f1ea129d1694eb0cf2ec7356d0b18
   in
   lwt body_string = Cohttp_lwt_body.to_string body in
   Lwt.return (Yojson.from_string body_string)
