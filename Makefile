@@ -3,6 +3,7 @@ DIRECTORIES :=	pumgrana_client_tools	\
 		pumgrana_api		\
 		readability		\
 		freebase_youtube	\
+		dbpedia			\
 		tidy
 
 DOC_DIR :=	doc/html
