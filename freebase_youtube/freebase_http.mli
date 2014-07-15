@@ -22,7 +22,5 @@ type freebase_object =
 val print_freebase_object : freebase_object -> unit
 
 (*** Requests ***)
-(**
-** return a list of freebase basic object from a list of topic_ids
-*)
+(** return a list of freebase basic object from a list of topic_ids *)
 val get_topics  : string -> freebase_object Lwt.t
