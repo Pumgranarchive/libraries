@@ -1,0 +1,9 @@
+{1 Dbpedia ocaml binding documentation}
+
+{!modules:
+        Dbpedia_query
+}
+
+{2 Index}
+
+{!indexlist}

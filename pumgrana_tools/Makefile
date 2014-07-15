@@ -6,7 +6,8 @@ ML :=		pjson.ml	\
 		ptype.ml	\
 		pdeserialize.ml
 
-MLI :=		ptype.mli
+MLI :=		$(VPATH)/pjson.mli		\
+		$(VPATH)/ptype.mli
 
 
 PACKAGES :=	rdf,str,yojson
@@ -17,7 +18,9 @@ CMI :=		$(MLI:.mli=.cmi)
 ALL_CMI :=	$(ML:.ml=.cmi)
 LIB :=		-package $(PACKAGES)
 SYNTAX :=	-syntax camlp4o -package lwt.syntax
+DOC_DIR :=	doc/html/
 OCAMLFIND :=	ocamlfind
+OCAMLDOC :=	$(OCAMLFIND) ocamldoc $(SYNTAX) $(LIB) -intro doc/indexdoc -html -d $(DOC_DIR)
 OCAMLC :=	$(OCAMLFIND) ocamlc $(SYNTAX) $(LIB)
 OCAMLOPT :=	$(OCAMLFIND) ocamlopt $(SYNTAX) $(LIB)
 OCAMLDEP :=	$(OCAMLFIND) ocamldep $(SYNTAX) $(LIB)
@@ -42,6 +45,10 @@ uninstall:
 
 reinstall:	re uninstall install
 
+doc:
+		mkdir -p $(DOC_DIR)
+		$(OCAMLDOC) $(MLI)
+
 .SUFFIXES:	.ml .mli .cmo .cmi .cmx
 
 %.cmx:		%.ml
@@ -59,5 +66,7 @@ clean:
 
 # .depend:
 # 		$(OCAMLDEP) $(MLI) $(ML) > .depend
+
+.PHONY:		doc
 
 # include .depend

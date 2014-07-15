@@ -5,7 +5,6 @@ open Pjson
 
 exception Bad_format of string
 
-(** Get service return data *)
 let get_service_return func json =
   let data =
     try
@@ -19,7 +18,6 @@ let get_service_return func json =
   in
   func data
 
-(** Get id into content_id return  *)
 let get_content_uri_return json =
   try
     let json_content_uri = member "content_uri" json in
@@ -28,7 +26,6 @@ let get_content_uri_return json =
   | e -> print_endline (Printexc.to_string e);
     raise (Bad_format "Bad content_uri format")
 
-(** deserialize content from yojson to ocaml format *)
 let get_content json_content =
   try
     let uri = member "uri" json_content in
@@ -43,7 +40,6 @@ let get_content json_content =
   | e -> print_endline (Printexc.to_string e);
     raise (Bad_format  "Bad content format")
 
-(** deserialize short content from yojson to ocaml format *)
 let get_short_content json_content =
   try
     let uri = member "uri" json_content in
@@ -55,7 +51,6 @@ let get_short_content json_content =
   | e -> print_endline (Printexc.to_string e);
     raise (Bad_format  "Bad short content format")
 
-(** deserialize link from yojson to ocaml format *)
 let get_link json_link =
   try
     let link_id = member "link_uri" json_link in
@@ -69,7 +64,6 @@ let get_link json_link =
   | e -> print_endline (Printexc.to_string e);
     raise (Bad_format  "Bad link format")
 
-(** deserialize tags_uri from yojson to ocaml format *)
 let get_tags_uri_return json_tag =
   try
     let uris = to_list (member "tags_uri" json_tag) in
@@ -78,7 +72,6 @@ let get_tags_uri_return json_tag =
   | e -> print_endline (Printexc.to_string e);
     raise (Bad_format  "Bad tags_uri format")
 
-(** deserialize tag from yojson to ocaml format *)
 let get_tag json_tag =
   try
     let uri = to_string (member "uri" json_tag) in
@@ -88,7 +81,6 @@ let get_tag json_tag =
   | e -> print_endline (Printexc.to_string e);
     raise (Bad_format  "Bad tag format")
 
-(** deserialize links_uri from yojson to ocaml format *)
 let get_links_uri_return json_tag =
   try
     let uris = to_list (member "links_uri" json_tag) in
@@ -97,7 +89,6 @@ let get_links_uri_return json_tag =
   | e -> print_endline (Printexc.to_string e);
     raise (Bad_format  "Bad links_uri format")
 
-(** deserialize json link detail to ocaml  *)
 let get_link_detail json_detail =
   try
     let link_id = to_string (member "link_uri" json_detail) in
@@ -112,22 +103,17 @@ let get_link_detail json_detail =
   | e -> print_endline (Printexc.to_string e);
     raise (Bad_format  "Bad link detail format")
 
-(** deserialize tag list from yojson to ocaml *)
 let get_tag_list tl =
   List.map get_tag (to_list tl)
 
-(** deserialize content list from yojson to ocaml *)
 let get_content_list tl =
   List.map get_content (to_list tl)
 
-(** deserialize short content list from yojson to ocaml *)
 let get_short_content_list tl =
   List.map get_short_content (to_list tl)
 
-(** deserialize link list from yojson to ocaml *)
 let get_link_list tl =
   List.map get_link (to_list tl)
 
-(** deserialize detail link list from yojson to ocaml *)
 let get_detail_link_list tl =
   List.map get_link_detail (to_list tl)

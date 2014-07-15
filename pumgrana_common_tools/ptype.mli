@@ -1,9 +1,11 @@
 (**
-   {b Pumgrana type -
-   This module contains the API Pumgrana type}
+   {b Pumgrana API types}
 *)
 
+(** Raised in case of invalid uri  *)
 exception Invalid_uri of string
+
+(** Raise in case od invalid link_id  *)
 exception Invalid_link_id of string
 
 type uri
