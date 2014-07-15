@@ -261,9 +261,6 @@ let get_videos_from_playlist_id playlist_id max_result =
   aux playlist_id max_result
 
 
-(**
-** return a list of video from a channel id or username
-*)
 (* NOTE: this function is private and can't be moved in private section *)
 (* TODO:
 ** - remove List.hd and process all channels
@@ -283,9 +280,15 @@ let get_uploaded_videos_from_channel ids user_name =
   let video_count = get_videoCount_field (get_statistics_field item) in
   get_videos_from_playlist_id playlist_id (int_of_string video_count)
 
+(**
+** return a list of video of a channel from its id
+*)
 let get_uploaded_videos_from_channel_ids ids =
   get_uploaded_videos_from_channel (Some ids) None
 
+(**
+** return a list of video of a channel from the name of the user owner of the channel
+*)
 let get_uploaded_videos_from_user_name user_name =
   get_uploaded_videos_from_channel None (Some user_name)
 

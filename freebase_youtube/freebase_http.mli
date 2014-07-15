@@ -18,8 +18,11 @@ type freebase_object =
   )
 
 (*** Printing ***)
+(** Print a basic freebase object on stdout *)
 val print_freebase_object : freebase_object -> unit
 
 (*** Requests ***)
-val search      : string -> Yojson.Basic.json Lwt.t
+(**
+** return a list of freebase basic object from a list of topic_ids
+*)
 val get_topics  : string -> freebase_object Lwt.t
