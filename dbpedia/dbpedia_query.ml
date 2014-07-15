@@ -31,11 +31,12 @@ type sparql_information = { keys : string list; query : string}
 
 (* type basic = (title * abstract * rdf_type * wiki_page * is_primary_topic_of * label * same_as) *)
 
-let basic_informations = {
-  (* basic = [Title | Abstract | Rdf_type | Wiki_page | Is_primary_topic_of | Label | Same_as]; *)
-  keys =
-    ["title";"abstract";"type";"wikiPage";"isPrimaryTopicOf";"label";"sameAs"];
-  query = "PREFIX dbpedia-owl: <http://dbpedia.org/ontology/>
+let get_basic_query_infos name =
+  let aux = {
+    (* basic = [Title | Abstract | Rdf_type | Wiki_page | Is_primary_topic_of | Label | Same_as]; *)
+    keys =
+      ["title";"abstract";(* "type"; *)"wikiPage";"isPrimaryTopicOf";"label"(*; "sameAs" *)];
+    query = "PREFIX dbpedia-owl: <http://dbpedia.org/ontology/>
 PREFIX dbres: <http://dbpedia.org/resource/>
 PREFIX dbprop: <http://dbpedia.org/property/>
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
@@ -47,37 +48,42 @@ SELECT DISTINCT ?title ?abstract ?type ?wikiPage ?isPrimaryTopicOf ?label ?sameA
 WHERE
 {
 
- {
-   dbres:Rhapsody_of_Fire dbprop:name ?title.
+   ?band dbprop:name \"" ^ name ^ "\"@en.
+   ?band dbprop:name ?title.
+   ?band dbpedia-owl:abstract ?abstract.
+   ?band dbpedia-owl:wikiPageID ?wikiPage.
+   ?band foaf:isPrimaryTopicOf ?isPrimaryTopicOf.
+   ?band rdfs:label ?label.
+
    FILTER (lang(?title) = '' || lang(?title) = 'en')
- }
- UNION
- {
-   dbres:Rhapsody_of_Fire dbpedia-owl:abstract ?abstract.
    FILTER (lang(?abstract) = '' || lang(?abstract) = 'en')
- }
- UNION
- {
-   dbres:Rhapsody_of_Fire rdf:type ?type.
- }
- UNION
- {
-   dbres:Rhapsody_of_Fire dbpedia-owl:wikiPageID ?wikiPage.
- }
- UNION
- {
-   dbres:Rhapsody_of_Fire foaf:isPrimaryTopicOf ?isPrimaryTopicOf.
- }
- UNION
- {
-   dbres:Rhapsody_of_Fire rdfs:label ?label.
    FILTER (lang(?label) = '' || lang(?label) = 'en')
- }
- UNION
- {
-   dbres:Rhapsody_of_Fire owl:sameAs ?sameAs.
- }
 
 }
-limit 1000"
-}
+limit 1000";
+  }
+  in
+  aux
+
+let get_discography_query_infos band_name =
+  let aux = {
+    keys =
+      ["song";"song_name";"album"];
+    query = "
+PREFIX dbres: <http://dbpedia.org/resource/>
+PREFIX dbprop: <http://dbpedia.org/property/>
+PREFIx dbpedia-owl: <http://dbpedia.org/ontology/>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+SELECT ?song ?song_name ?album WHERE {
+  ?band_name dbprop:name \"" ^ band_name ^ "\"@en.
+  ?song dbpedia-owl:musicalArtist ?band_name.
+  ?song dbprop:name ?song_name.
+  ?song dbpprop:fromAlbum ?album
+}"
+  }
+  in
+  aux
