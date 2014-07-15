@@ -2,6 +2,8 @@
 
 {!modules:
         Dbpedia_query
+        Dbpedia_http
+        Rdf_http
 }
 
 {2 Index}
