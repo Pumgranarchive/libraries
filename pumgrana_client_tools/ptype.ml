@@ -36,7 +36,7 @@ let split sep str =
       let str2 = String.sub str p ((String.length str) - p) in
       aux (sub::list) str2
     with
-      Not_found -> list
+      Not_found -> str::list
   in
   List.rev (aux [] str)
 
@@ -91,13 +91,13 @@ let link_id_of_string link_id =
   try
     let strings = split "@" link_id in
     if List.length strings > 2 then raise (Invalid_argument "Too many @");
-    let origin_str_uri = List.hd strings in
-    let target_str_uri = List.hd (List.tl strings) in
+    let origin_str_uri = List.nth strings 0 in
+    let target_str_uri = List.nth strings 1 in
     let origin_uri = uri_of_string origin_str_uri in
     let target_uri = uri_of_string target_str_uri in
     origin_uri, target_uri
   with e ->
-    raise (Invalid_link_id (link_id ^ ": is not a valid link_id"))
+    raise (Invalid_link_id (link_id ^ ": is not a valid link_id : " ^ (Printexc.to_string e)))
 
 let pumgrana_id_of_uri base uri =
   let str = string_of_uri uri in
