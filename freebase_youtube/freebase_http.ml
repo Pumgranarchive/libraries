@@ -31,9 +31,10 @@ let api_topic_url = api_base_url ^ "topic"
 
 (*** url creators ***)
 let create_search_url request = api_search_url ^ request
-let create_topic_url ids filter lang =
+let create_topic_url ids filter limit lang =
   api_topic_url ^ ids
   ^ "?filter=" ^ (Bfy_helpers.strings_of_list filter "&filter=")
+  ^ "&limit=" ^ (string_of_int limit)
   ^ "&lang=" ^ lang
 
 (*** json accessor ***)
@@ -73,19 +74,26 @@ let get_totype_field json =
 let get_cttopic_equivalent_webpage_field json =
   Yojson_wrap.member "/common/topic/topic_equivalent_webpage" json
 
+let hd d l =
+  if List.length l = 0
+  then d
+  else List.hd l
+
 (*** Unclassed ***)
 let freebase_object_of_json json =
   let id = get_id_field json in
   let property = get_property_field json in
   let sliced_description =
-    let ct_descr = List.hd (get_values_field (get_ctdescription_field property)) in
+    let ct_descr = hd (`Assoc [])
+      (get_values_field (get_ctdescription_field property))
+    in
     get_text_field ct_descr in
   let social_media_presences =
     List.map
       get_value_field
       (get_values_field (get_ctsocial_media_presence_field property)) in
   let name =
-    get_value_field (List.hd (get_values_field (get_toname_field property))) in
+    get_value_field (hd (`String "") (get_values_field (get_toname_field property))) in
   let types =
     let create_type json = (get_id_field json, get_text_field json) in
     List.map create_type (get_values_field (get_totype_field property)) in
@@ -106,7 +114,8 @@ let freebase_object_of_json json =
         get_value_field
         (get_values_field (get_cttopic_equivalent_webpage_field property))
     in
-    get_wiki_url url_list
+    let toto = get_wiki_url url_list in
+    toto
   in
   (id, name, sliced_description, social_media_presences, types, wiki_url)
 
@@ -132,7 +141,7 @@ let print_freebase_object
     ^ "->sliced_description:\"" ^ sliced_description ^ "\"\n"
     ^ "->sm_presences:" ^ (string_of_sm sm_presences) ^ "\n"
     ^ "->types:" ^ (string_of_type types) ^ "\n"
-    ^ "->wiki_url:\"" ^ (List.hd wiki_url) ^ "\"\n")
+    ^ "->wiki_url:\"" ^ (hd "" wiki_url) ^ "\"\n")
 
 
 (*** requests ***)
@@ -159,6 +168,7 @@ let get_topics ids =
         "/common/topic/description";
         "/common/topic/social_media_presence"
       ]
+      1000
       "en"
   in
   lwt freebase_json = Http_request_manager.request ~display_body:false url
