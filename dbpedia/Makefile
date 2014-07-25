@@ -2,6 +2,7 @@ NAME :=		dbpedia
 
 ML :=		dbpedia_query.ml	\
 		rdf_http.ml		\
+		dbpedia_record.ml	\
 		dbpedia_http.ml
 
 ML_EXEC :=	$(ML)			\
@@ -51,6 +52,16 @@ doc:
 		$(OCAMLDOC) $(MLI)
 
 .SUFFIXES:	.ml .mli .cmo .cmi .cmx
+
+
+dbpedia_record.ml:	dbpedia_record.template dbpedia_record.model
+			./dbpedia_record_generator.sh
+
+dbpedia_record.cmx:	dbpedia_record.ml
+			$(OCAMLOPT) -c dbpedia_record.ml
+
+dbpedia_record.cmo:	dbpedia_record.ml
+			$(OCAMLC) -c dbpedia_record.ml
 
 .ml.cmx:
 		$(OCAMLOPT) -c $<

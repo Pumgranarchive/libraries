@@ -1,0 +1,21 @@
+(* Allow type: string, int, float *)
+
+(** Keys **)
+(* field_name * type * getter *)
+
+(title, string, title)
+(abstract, string, abstract)
+(type, string, type_v)
+(wikiPage, string, wiki_page)
+(isPrimaryTopicOf, string, is_primary_topic_of)
+(label, string, label)
+(sameAs, string, same_as)
+(song, string, song)
+(song_name, string, song_name)
+(album, string, album)
+
+(** Types **)
+(* TypeName:key list *)
+
+Basic:[title; abstract; type; wikiPage; isPrimaryTopicOf; label; sameAs]
+Disco:[song; song_name; album]

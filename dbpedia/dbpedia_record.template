@@ -1,0 +1,97 @@
+module Generic =
+    struct
+
+      type key = %%KEY_LIST%%
+
+      type result =
+           | String of string
+           | Int of int
+           | Float of float
+
+      let to_string term =
+        String (Rdf_term.string_of_term term)
+
+      let to_int term =
+        Int (int_of_string (Rdf_term.string_of_term term))
+
+      let to_float term =
+        Float (float_of_string (Rdf_term.string_of_term term))
+
+      let data_of_key = function
+          %%DATA_LIST%%
+
+      let string_of_key key =
+        let func, name = data_of_key key in
+        name
+
+      let function_of_key key =
+        let func, name = data_of_key key in
+        func
+
+      let values_of_solutions keys solutions =
+        let get_pair solution =
+          let aux l key =
+            let convert_f, str_key = data_of_key key in
+            if Rdf_sparql.is_bound solution str_key
+            then convert_f (Rdf_sparql.get_term solution str_key)::l
+            else l
+          in
+          List.fold_left aux [] keys
+        in
+        List.map get_pair solutions
+
+      let print_pair = function
+        | Some (key, value) -> Printf.printf "%s :: %s\n" key value
+        | None              -> ()
+
+      let print_value = function
+        | Some v -> print_endline v;
+        | None   -> ()
+
+      let parse keys solutions =
+        values_of_solutions keys solutions
+
+      let key_compare k1 k2 =
+        let str_k1 = string_of_key k1 in
+        let str_k2 = string_of_key k2 in
+        String.compare str_k1 str_k2
+
+      let get keys res key =
+        let get_pos select_f list =
+          let rec aux select_f count = function
+            | k::tail   ->
+              if select_f k
+              then count
+              else aux select_f (count + 1) tail
+            | []        -> count
+          in
+          let pos = aux select_f 0 list in
+          if pos < List.length list then pos else
+            (print_endline (string_of_key key);
+             raise Not_found)
+        in
+        let compare k = key_compare k key = 0 in
+        let pos = get_pos compare keys in
+        List.nth res pos
+
+      let get_string keys res key =
+        let ret = get keys res key in
+        match ret with
+        | String r -> r
+        | _        -> failwith ((string_of_key key) ^ " : is not a string")
+
+      let get_int keys res key =
+        let ret = get keys res key in
+        match ret with
+        | Int r -> r
+        | _     -> failwith ((string_of_key key) ^ " : is not an int")
+
+      let get_float keys res key =
+        let ret = get keys res key in
+        match ret with
+        | Float r -> r
+        | _      -> failwith ((string_of_key key) ^ " : is not a float")
+
+    end;;
+
+%%MODULES%%
