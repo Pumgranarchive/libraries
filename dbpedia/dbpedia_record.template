@@ -1,3 +1,5 @@
+exception Not_found of string
+
 module Generic =
     struct
 
@@ -34,7 +36,7 @@ module Generic =
             let convert_f, str_key = data_of_key key in
             if Rdf_sparql.is_bound solution str_key
             then convert_f (Rdf_sparql.get_term solution str_key)::l
-            else l
+            else raise (Not_found str_key)
           in
           List.fold_left aux [] keys
         in
@@ -66,9 +68,8 @@ module Generic =
             | []        -> count
           in
           let pos = aux select_f 0 list in
-          if pos < List.length list then pos else
-            (print_endline (string_of_key key);
-             raise Not_found)
+          if pos < List.length list then pos
+          else raise (Not_found (string_of_key key))
         in
         let compare k = key_compare k key = 0 in
         let pos = get_pos compare keys in
