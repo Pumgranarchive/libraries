@@ -152,7 +152,7 @@ let videos_of_json json =
     let id = get_video_id item in
     let url = g_video_base_url ^ id in
     let description =
-      Bfy_helpers.reduce_string (get_description_field snippet) 50 in
+      Bfy_helpers.reduce_string (get_description_field snippet) 200 in
     let categories = get_categories item
     in
     (id, get_title_field snippet, url, description, categories)
