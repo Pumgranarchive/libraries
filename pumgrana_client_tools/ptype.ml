@@ -61,11 +61,14 @@ let replace remove_list replace_list str =
   in
   List.fold_left2 aux str remove_list replace_list
 
+let char_list =    ["/";  ":";  "?";  "=";  "&";  "#";  ";";  " "]
+let encoded_char = ["%2F";"%3A";"%3F";"%3D";"%26";"%23";"%3B";"%20"]
+
 let uri_encode url =
-  replace ["/";":";"?";"=";"&"] ["%2F";"%3A";"%3F";"%3D";"%26"] url
+  replace char_list encoded_char url
 
 let uri_decode url =
-  replace ["%2F";"%3A";"%3F";"%3D";"%26"] ["/";":";"?";"=";"&"] url
+  replace encoded_char char_list url
 
 (******************************************************************************
 *********************************** Type **************************************
