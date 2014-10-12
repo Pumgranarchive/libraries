@@ -1,0 +1,15 @@
+
+
+let url = "http://www.bbc.co.uk/nature/life/Spider"
+
+let header = Cohttp.Header.add headers (Cohttp.Header.init_with "accept" "application/json") "user-agent" "ocaml-rdf/0.8"
+
+lwt srvAnswer = Cohttp_lwt_unix.Client.get header url
+
+let getHeader (header, _) = 
+	Lwt.return (Cohttp_lwt_header.to_string header)
+let getbody (_, body) = 
+	Lwt.return (Cohttp_lwt_body.to_string body)
+
+let () = print_endline (getbody srvAnswer)
+
