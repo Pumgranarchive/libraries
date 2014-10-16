@@ -36,6 +36,8 @@ let get_values pairs key_to_find =
   let get_value (key, value) = value in
   List.map get_value current_pairs
 
+let get_exc_string e = "DBpedia: " ^ (Printexc.to_string e)
+
 (*
 ** PUBLIC
 *)
@@ -84,7 +86,7 @@ let get_basic_informations name =
     (* dbpedia_results Dbpedia_query.(basic_query.keys)) in *)
     (* List.map basic_of_pair pairs_list *)
     Lwt.return (List.map format ret)
-  with e -> raise (Dbpedia (Printexc.to_string e))
+  with e -> raise (Dbpedia (get_exc_string e))
 
 let get_discography name =
   try
@@ -107,4 +109,4 @@ let get_discography name =
     (* dbpedia_results Dbpedia_query.(discography_query.keys)) in *)
     (* List.map discography_of_pair pairs_list *)
     Lwt.return (List.map format ret)
-  with e -> raise (Dbpedia (Printexc.to_string e))
+  with e -> raise (Dbpedia (get_exc_string e))
