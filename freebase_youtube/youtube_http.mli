@@ -12,6 +12,9 @@ type relevant_topic_ids = string list
 type categories = (topic_ids * relevant_topic_ids)
 type video = (video_id * title * url * sliced_description * categories)
 
+exception BadYoutubeUrl of string
+exception Youtube of string
+
 (*** Constructors ***)
 (** create an id from a youtube url.
     An exception will be raised if the url is not correct *)

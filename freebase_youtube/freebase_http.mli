@@ -7,6 +7,8 @@ type social_media_presences = string list
 type types = (string * string) list
 type wiki_url = string list
 
+exception Freebase of string
+
 type freebase_object =
   (
     id

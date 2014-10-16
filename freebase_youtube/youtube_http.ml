@@ -6,7 +6,8 @@
 (*
 ** exceptions
 *)
-exception Bad_youtube_url of string
+exception BadYoutubeUrl of string
+exception Youtube of string
 
 (*
 ** Types
@@ -177,7 +178,7 @@ let get_video_id_from_url url =
     String.sub url id_start (id_end - id_start)
   in
   if (is_url_from_youtube url) = false
-  then raise (Bad_youtube_url "Youtube url pattern not recognized.")
+  then raise (BadYoutubeUrl "Youtube url pattern not recognized.")
   else extract_id_from_url url
 
 
@@ -206,59 +207,69 @@ let print_youtube_video (id, title, url, description, categories) =
 ** return a list of video from a list of id
 *)
 let get_videos_from_ids video_ids =
-  let youtube_url_http =
-    create_video_url
-      video_ids
-      "snippet,topicDetails"
-      "items(id,snippet(title,description),topicDetails)" in
-  lwt youtube_json = Http_request_manager.request ~display_body:false youtube_url_http
-  in
-  Lwt.return (videos_of_json youtube_json)
-
+  try
+    let youtube_url_http =
+      create_video_url
+        video_ids
+        "snippet,topicDetails"
+        "items(id,snippet(title,description),topicDetails)" in
+    lwt youtube_json = Http_request_manager.request
+            ~display_body:false youtube_url_http
+    in
+    Lwt.return (videos_of_json youtube_json)
+  with e -> raise (Youtube (Printexc.to_string e))
 
 (**
 ** get a list of video from a research
 *)
 let search_video request max_result =
-  let url =
-    create_search_url
-      request
-      "snippet"
-      "items(id,snippet(title,description))"
-      (string_of_int max_result)
-      "video"
-  in
-  let get_id_from_video (id, _, _, _, _) = id in
-  lwt youtube_json = Http_request_manager.request ~display_body:false url in
-  let videos = videos_of_json youtube_json in
-  let ids = (List.map get_id_from_video videos) in
-  get_videos_from_ids ids
-
+  try
+    let url =
+      create_search_url
+        request
+        "snippet"
+        "items(id,snippet(title,description))"
+        (string_of_int max_result)
+        "video"
+    in
+    let get_id_from_video (id, _, _, _, _) = id in
+    lwt youtube_json = Http_request_manager.request ~display_body:false url in
+    let videos = videos_of_json youtube_json in
+    let ids = (List.map get_id_from_video videos) in
+    get_videos_from_ids ids
+  with e -> raise (Youtube (Printexc.to_string e))
 
 (**
 ** return a list of video from an id
 *)
 let get_videos_from_playlist_id playlist_id max_result =
-  let get_id item = get_videoId_field (get_contentDetails_field item) in
-  let rec aux playlist_id ?(page_token = None) max_result =
-    let (max_result, next_max_result) =
-      if max_result > 50 then (50, max_result - 50) else (max_result, 0) in
-    let youtube_url_http =
-      create_playlist_item_url
-        playlist_id
-        ~page_token:page_token
-        (string_of_int max_result)
-        "id,contentDetails,snippet"
-        "nextPageToken,items(contentDetails(videoId),snippet(position))"
+  try
+    let get_id item = get_videoId_field (get_contentDetails_field item) in
+    let rec aux playlist_id ?(page_token = None) max_result =
+      let (max_result, next_max_result) =
+        if max_result > 50 then (50, max_result - 50) else (max_result, 0) in
+      let youtube_url_http =
+        create_playlist_item_url
+          playlist_id
+          ~page_token:page_token
+          (string_of_int max_result)
+          "id,contentDetails,snippet"
+          "nextPageToken,items(contentDetails(videoId),snippet(position))"
+      in
+      lwt youtube_json = Http_request_manager.request
+        ~display_body:false youtube_url_http
+      in
+      let next_page_token = get_nextPageToken_field youtube_json in
+      lwt ids =
+        get_videos_from_ids (List.map get_id (get_items_field youtube_json))
+      in
+      if next_max_result = 0 || next_page_token = ""
+      then (Lwt.return ids)
+      else (lwt new_ids = aux playlist_id (~page_token:(Some next_page_token))
+          next_max_result in Lwt.return (ids@new_ids))
     in
-    lwt youtube_json = Http_request_manager.request ~display_body:false youtube_url_http in
-    let next_page_token = get_nextPageToken_field youtube_json in
-    lwt ids = get_videos_from_ids (List.map get_id (get_items_field youtube_json)) in
-    if next_max_result = 0 || next_page_token = ""
-    then (Lwt.return ids)
-    else (lwt new_ids = aux playlist_id (~page_token:(Some next_page_token)) next_max_result in Lwt.return (ids@new_ids))
-  in
-  aux playlist_id max_result
+    aux playlist_id max_result
+  with e -> raise (Youtube (Printexc.to_string e))
 
 
 (* NOTE: this function is private and can't be moved in private section *)
@@ -267,18 +278,24 @@ let get_videos_from_playlist_id playlist_id max_result =
 ** - add max_result based on number channel expected
 *)
 let get_uploaded_videos_from_channel ids user_name =
-  let youtube_url_http =
-    create_channel_url_from_id
-      ~id:ids
-      ~user_name:user_name
-      "contentDetails,statistics"
-      "items(contentDetails(relatedPlaylists(uploads)),statistics(videoCount))" in
-  lwt youtube_json = Http_request_manager.request ~display_body:false youtube_url_http in
-  let item = List.hd(get_items_field youtube_json) in
-  let content_details = (get_contentDetails_field item) in
-  let playlist_id = get_uploads_field (get_relatedPlaylists_field content_details) in
-  let video_count = get_videoCount_field (get_statistics_field item) in
-  get_videos_from_playlist_id playlist_id (int_of_string video_count)
+  try
+    let youtube_url_http =
+      create_channel_url_from_id
+        ~id:ids
+        ~user_name:user_name
+        "contentDetails,statistics"
+        "items(contentDetails(relatedPlaylists(uploads)),statistics(videoCount))" in
+    lwt youtube_json = Http_request_manager.request
+            ~display_body:false youtube_url_http
+    in
+    let item = List.hd(get_items_field youtube_json) in
+    let content_details = (get_contentDetails_field item) in
+    let playlist_id = get_uploads_field
+      (get_relatedPlaylists_field content_details)
+    in
+    let video_count = get_videoCount_field (get_statistics_field item) in
+    get_videos_from_playlist_id playlist_id (int_of_string video_count)
+  with e -> raise (Youtube (Printexc.to_string e))
 
 (**
 ** return a list of video of a channel from its id
@@ -291,4 +308,3 @@ let get_uploaded_videos_from_channel_ids ids =
 *)
 let get_uploaded_videos_from_user_name user_name =
   get_uploaded_videos_from_channel None (Some user_name)
-

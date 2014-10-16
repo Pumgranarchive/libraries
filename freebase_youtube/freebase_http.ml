@@ -9,6 +9,8 @@ type social_media_presences = string list
 type types = (string * string) list
 type wiki_url = string list
 
+exception Freebase of string
+
 type freebase_object =
   (
     id
@@ -147,31 +149,33 @@ let print_freebase_object
 (*** requests ***)
 (* for now it is private, this function isn't finished *)
 let search query =
-  let url = create_search_url query in
-  lwt freebase_json = Http_request_manager.request url
-  in
-  Lwt.return (freebase_json)
+  try
+    let url = create_search_url query in
+    lwt freebase_json = Http_request_manager.request url in
+    Lwt.return (freebase_json)
+  with e -> raise (Freebase (Printexc.to_string e))
 
 (* TODO: ids must become a list *)
 (**
 ** return a list of freebase basic object from a list of topic_ids
 *)
 let get_topics ids =
-  let url =
-    create_topic_url
-      ids
-      [
-        "/common/topic/description";
-        "/common/topic/topic_equivalent_webpage";
-        "/type/object/name";
-        "/type/object/type";
-        "/common/topic/description";
-        "/common/topic/social_media_presence"
-      ]
-      1000
-      "en"
-  in
-  lwt freebase_json = Http_request_manager.request ~display_body:false url
-  in
-  Lwt.return (freebase_object_of_json freebase_json)
-
+  try
+    let url =
+      create_topic_url
+        ids
+        [
+          "/common/topic/description";
+          "/common/topic/topic_equivalent_webpage";
+          "/type/object/name";
+          "/type/object/type";
+          "/common/topic/description";
+          "/common/topic/social_media_presence"
+        ]
+        1000
+        "en"
+    in
+    lwt freebase_json = Http_request_manager.request ~display_body:false url
+    in
+    Lwt.return (freebase_object_of_json freebase_json)
+  with e -> raise (Freebase (Printexc.to_string e))
