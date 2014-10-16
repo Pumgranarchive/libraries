@@ -31,6 +31,8 @@ let api_base_url = "https://www.googleapis.com/freebase/v1/"
 let api_search_url = api_base_url ^ "search?query="
 let api_topic_url = api_base_url ^ "topic"
 
+let get_exc_string e = "Freebase: " ^ (Printexc.to_string e)
+
 (*** url creators ***)
 let create_search_url request = api_search_url ^ request
 let create_topic_url ids filter limit lang =
@@ -153,7 +155,7 @@ let search query =
     let url = create_search_url query in
     lwt freebase_json = Http_request_manager.request url in
     Lwt.return (freebase_json)
-  with e -> raise (Freebase (Printexc.to_string e))
+  with e -> raise (Freebase (get_exc_string e))
 
 (* TODO: ids must become a list *)
 (**
@@ -178,4 +180,4 @@ let get_topics ids =
     lwt freebase_json = Http_request_manager.request ~display_body:false url
     in
     Lwt.return (freebase_object_of_json freebase_json)
-  with e -> raise (Freebase (Printexc.to_string e))
+  with e -> raise (Freebase (get_exc_string e))

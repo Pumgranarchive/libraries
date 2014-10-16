@@ -37,6 +37,8 @@ let g_youtube_api_key = "AIzaSyBlcjTwKF9UmOqnnExTZGgdY9nwS_0C5A8"
 let g_api_base_url = "https://www.googleapis.com/youtube/v3/"
 let g_video_base_url = "https://www.youtube.com/watch?v="
 
+let get_exc_string e = "Youtube: " ^ (Printexc.to_string e)
+
 (*** Url creators ***)
 let create_search_url query parts fields max_results type_of_result =
   g_api_base_url ^ "search"
@@ -217,7 +219,7 @@ let get_videos_from_ids video_ids =
             ~display_body:false youtube_url_http
     in
     Lwt.return (videos_of_json youtube_json)
-  with e -> raise (Youtube (Printexc.to_string e))
+  with e -> raise (Youtube (get_exc_string e))
 
 (**
 ** get a list of video from a research
@@ -237,7 +239,7 @@ let search_video request max_result =
     let videos = videos_of_json youtube_json in
     let ids = (List.map get_id_from_video videos) in
     get_videos_from_ids ids
-  with e -> raise (Youtube (Printexc.to_string e))
+  with e -> raise (Youtube (get_exc_string e))
 
 (**
 ** return a list of video from an id
@@ -269,7 +271,7 @@ let get_videos_from_playlist_id playlist_id max_result =
           next_max_result in Lwt.return (ids@new_ids))
     in
     aux playlist_id max_result
-  with e -> raise (Youtube (Printexc.to_string e))
+  with e -> raise (Youtube (get_exc_string e))
 
 
 (* NOTE: this function is private and can't be moved in private section *)
@@ -295,7 +297,7 @@ let get_uploaded_videos_from_channel ids user_name =
     in
     let video_count = get_videoCount_field (get_statistics_field item) in
     get_videos_from_playlist_id playlist_id (int_of_string video_count)
-  with e -> raise (Youtube (Printexc.to_string e))
+  with e -> raise (Youtube (get_exc_string e))
 
 (**
 ** return a list of video of a channel from its id
