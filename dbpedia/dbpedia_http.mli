@@ -11,8 +11,11 @@ type url = string
 type name = string
 type album = string
 
-type basic = (title * abstract * rdf_type * wiki_page * is_primary_topic_of * label * same_as)
+type basic = (title * abstract * rdf_type * wiki_page * is_primary_topic_of *
+                label * same_as)
 type song = (url * title * album)
+
+exception Dbpedia of string
 
 (*** Printing ***)
 (** Print a basic dbpedia object on stdout *)
