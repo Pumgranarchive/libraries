@@ -88,7 +88,7 @@ let add_j name f p list = bind (fun x -> (name, f x)::list) list p
 
 
 let exc_wrapper func =
-  try func ()
+  try_lwt func ()
   with e -> raise (Pumgrana ("Pumgrana: " ^ (Printexc.to_string e)))
 
 
