@@ -3,7 +3,7 @@
    This module bind the Pumgrana API}
 *)
 
-exception Internal_error of string
+exception Pumgrana of string
 
 open Ptype
 

@@ -7,7 +7,7 @@ module Yojson = Yojson.Basic
 
 open Ptype
 
-exception Internal_error of string
+exception Pumgrana of string
 
 (******************************************************************************
 ****************************** Configuration **********************************
@@ -87,6 +87,11 @@ let json_of_strings strs = `List (List.map json_of_string strs)
 let add_j name f p list = bind (fun x -> (name, f x)::list) list p
 
 
+let exc_wrapper func =
+  try func ()
+  with e -> raise (Pumgrana ("Pumgrana: " ^ (Printexc.to_string e)))
+
+
 let base_headers () =
   Cohttp.Header.init_with "accept" "application/json"
 
@@ -124,126 +129,178 @@ let post uri json =
 *******************************************************************************)
 
 let get_content_detail content_uri =
-  let parameter = uri_encode (string_of_uri content_uri) in
-  lwt json = get content_detail_uri parameter in
-  Lwt.return (List.hd Pdeserialize.(get_service_return get_content_list json))
+  let aux () =
+    let parameter = uri_encode (string_of_uri content_uri) in
+    lwt json = get content_detail_uri parameter in
+    Lwt.return (List.hd Pdeserialize.(get_service_return get_content_list json))
+  in
+  exc_wrapper aux
+
 
 let get_contents ?filter ?tags_uri () =
-  let str_filter = map string_of_filter filter in
-  let str_tags_uri = map (List.map string_of_uri) tags_uri in
-  let parameters = (add_p_list str_tags_uri (add_p str_filter "")) ^ "/" in
-  lwt json = get contents_uri parameters in
-  Lwt.return (Pdeserialize.(get_service_return get_short_content_list json))
+  let aux () =
+    let str_filter = map string_of_filter filter in
+    let str_tags_uri = map (List.map string_of_uri) tags_uri in
+    let parameters = (add_p_list str_tags_uri (add_p str_filter "")) ^ "/" in
+    lwt json = get contents_uri parameters in
+    Lwt.return (Pdeserialize.(get_service_return get_short_content_list json))
+  in
+  exc_wrapper aux
 
 let insert_content title summary body ?tags_uri () =
-  let json = `Assoc (add_j "tags_uri" json_of_uris tags_uri
-                       [("title", `String title);
-                        ("summary", `String summary);
-                        ("body", `String body)])
+  let aux () =
+    let json = `Assoc (add_j "tags_uri" json_of_uris tags_uri
+                         [("title", `String title);
+                          ("summary", `String summary);
+                          ("body", `String body)])
+    in
+    lwt json = post content_insert_uri json in
+    Lwt.return (Pdeserialize.get_content_uri_return json)
   in
-  lwt json = post content_insert_uri json in
-  Lwt.return (Pdeserialize.get_content_uri_return json)
+  exc_wrapper aux
 
 let update_content uri ?title ?summary ?body ?tags_uri () =
-  let json =
-    `Assoc (add_j "tags_uri" json_of_uris tags_uri
-              (add_j "body" json_of_string body
-                 (add_j "summary" json_of_string summary
-                    (add_j "title" json_of_string title
-                       ["content_uri", json_of_uri uri]))))
+  let aux () =
+    let json =
+      `Assoc (add_j "tags_uri" json_of_uris tags_uri
+                (add_j "body" json_of_string body
+                   (add_j "summary" json_of_string summary
+                      (add_j "title" json_of_string title
+                         ["content_uri", json_of_uri uri]))))
+    in
+    lwt _ = post content_update_uri json in
+    Lwt.return ()
   in
-  lwt _ = post content_update_uri json in
-  Lwt.return ()
+  exc_wrapper aux
 
 let update_content_tags uri tags_uri =
-  let json =
-    `Assoc [("tags_uri", json_of_uris tags_uri);
-            ("content_uri", json_of_uri uri)]
+  let aux () =
+    let json =
+      `Assoc [("tags_uri", json_of_uris tags_uri);
+              ("content_uri", json_of_uri uri)]
+    in
+    lwt _ = post content_update_tags_uri json in
+    Lwt.return ()
   in
-  lwt _ = post content_update_tags_uri json in
-  Lwt.return ()
+  exc_wrapper aux
 
 let delete_contents uris =
-  let json = `Assoc [("contents_uri", json_of_uris uris)] in
-  lwt _ = post content_delete_uri json in
-  Lwt.return ()
+  let aux () =
+    let json = `Assoc [("contents_uri", json_of_uris uris)] in
+    lwt _ = post content_delete_uri json in
+    Lwt.return ()
+  in
+  exc_wrapper aux
 
 (******************************************************************************
 *********************************** Tag ***************************************
 *******************************************************************************)
 
 let tags_by_type type_name =
-  let parameter = string_of_type_name type_name in
-  lwt json = get tag_type_uri parameter in
-  Lwt.return (Pdeserialize.(get_service_return get_tag_list json))
+  let aux () =
+    let parameter = string_of_type_name type_name in
+    lwt json = get tag_type_uri parameter in
+    Lwt.return (Pdeserialize.(get_service_return get_tag_list json))
+  in
+  exc_wrapper aux
 
 let tags_from_content content_uri =
-  let parameter = uri_encode (string_of_uri content_uri) in
-  lwt json = get tag_content_uri parameter in
-  Lwt.return (Pdeserialize.(get_service_return get_tag_list json))
+  let aux () =
+    let parameter = uri_encode (string_of_uri content_uri) in
+    lwt json = get tag_content_uri parameter in
+    Lwt.return (Pdeserialize.(get_service_return get_tag_list json))
+  in
+  exc_wrapper aux
 
 let tags_from_content_links content_uri =
-  let parameter = uri_encode (string_of_uri content_uri) in
-  lwt json = get tag_content_links_uri parameter in
-  Lwt.return (Pdeserialize.(get_service_return get_tag_list json))
+  let aux () =
+    let parameter = uri_encode (string_of_uri content_uri) in
+    lwt json = get tag_content_links_uri parameter in
+    Lwt.return (Pdeserialize.(get_service_return get_tag_list json))
+  in
+  exc_wrapper aux
 
 let insert_tags type_name ?uri tags_subject =
-  let json = `Assoc (add_j "uri" json_of_uri uri
-                       [("type_name", `String (string_of_type_name type_name));
-                        ("tags_subject", (json_of_strings tags_subject))])
+  let aux () =
+    let json = `Assoc (add_j "uri" json_of_uri uri
+                         [("type_name", `String (string_of_type_name type_name));
+                          ("tags_subject", (json_of_strings tags_subject))])
+    in
+    lwt json = post tag_insert_uri json in
+    Lwt.return (Pdeserialize.get_tags_uri_return json)
   in
-  lwt json = post tag_insert_uri json in
-  Lwt.return (Pdeserialize.get_tags_uri_return json)
+  exc_wrapper aux
 
 let delete_tags tags_uri =
-  let json = `Assoc [("tags_uri", json_of_uris tags_uri)] in
-  lwt _ = post tag_delete_uri json in
-  Lwt.return ()
+  let aux () =
+    let json = `Assoc [("tags_uri", json_of_uris tags_uri)] in
+    lwt _ = post tag_delete_uri json in
+    Lwt.return ()
+  in
+  exc_wrapper aux
 
 (******************************************************************************
 *********************************** Link **************************************
 *******************************************************************************)
 
 let get_link_detail link_id =
-  let parameter = string_of_link_id link_id in
-  lwt json = get link_detail_uri parameter in
-  Lwt.return (List.hd Pdeserialize.(get_service_return get_detail_link_list json))
+  let aux () =
+    let parameter = string_of_link_id link_id in
+    lwt json = get link_detail_uri parameter in
+    Lwt.return (List.hd Pdeserialize.(get_service_return get_detail_link_list json))
+  in
+  exc_wrapper aux
 
 let links_from_content content_uri =
-  let parameter = uri_encode (string_of_uri content_uri) in
-  lwt json = get link_content_uri parameter in
-  Lwt.return (Pdeserialize.(get_service_return get_link_list json))
+  let aux () =
+    let parameter = uri_encode (string_of_uri content_uri) in
+    lwt json = get link_content_uri parameter in
+    Lwt.return (Pdeserialize.(get_service_return get_link_list json))
+  in
+  exc_wrapper aux
 
 let links_from_content_tags content_uri tags_uri =
-  let content_str_uri = string_of_uri content_uri in
-  let str_tags_uri = List.map string_of_uri tags_uri in
-  let parameters =
-    (List.fold_left append (append "" content_str_uri) str_tags_uri ) ^ "/"
+  let aux () =
+    let content_str_uri = string_of_uri content_uri in
+    let str_tags_uri = List.map string_of_uri tags_uri in
+    let parameters =
+      (List.fold_left append (append "" content_str_uri) str_tags_uri ) ^ "/"
+    in
+    lwt json = get link_content_tags_uri parameters in
+    Lwt.return (Pdeserialize.(get_service_return get_link_list json))
   in
-  lwt json = get link_content_tags_uri parameters in
-  Lwt.return (Pdeserialize.(get_service_return get_link_list json))
+  exc_wrapper aux
 
 let insert_links links =
-  let json_of_links (origin_uri, target_uri, tags_uri) =
-    `Assoc [("origin_uri", json_of_uri origin_uri);
-            ("target_uri", json_of_uri target_uri);
-            ("tags_uri", json_of_uris tags_uri)]
+  let aux () =
+    let json_of_links (origin_uri, target_uri, tags_uri) =
+      `Assoc [("origin_uri", json_of_uri origin_uri);
+              ("target_uri", json_of_uri target_uri);
+              ("tags_uri", json_of_uris tags_uri)]
+    in
+    let json = `List (List.map json_of_links links) in
+    let json = `Assoc [("data", json)] in
+    lwt json = post link_insert_uri json in
+    Lwt.return (Pdeserialize.get_links_uri_return json)
   in
-  let json = `List (List.map json_of_links links) in
-  let json = `Assoc [("data", json)] in
-  lwt json = post link_insert_uri json in
-  Lwt.return (Pdeserialize.get_links_uri_return json)
+  exc_wrapper aux
 
 let update_links links =
-  let json_of_links (link_uri, tags_uri) =
-    `Assoc [("link_uri", json_of_link_id link_uri);
-            ("tags_uri", json_of_uris tags_uri)]
+  let aux () =
+    let json_of_links (link_uri, tags_uri) =
+      `Assoc [("link_uri", json_of_link_id link_uri);
+              ("tags_uri", json_of_uris tags_uri)]
+    in
+    let json = `Assoc [("data", `List (List.map json_of_links links))] in
+    lwt json = post link_update_uri json in
+    Lwt.return ()
   in
-  let json = `Assoc [("data", `List (List.map json_of_links links))] in
-  lwt json = post link_update_uri json in
-  Lwt.return ()
+  exc_wrapper aux
 
 let delete_links uris =
-  let json = `Assoc [("links_uri", json_of_link_ids uris)] in
-  lwt json = post link_delete_uri json in
-  Lwt.return ()
+  let aux () =
+    let json = `Assoc [("links_uri", json_of_link_ids uris)] in
+    lwt json = post link_delete_uri json in
+    Lwt.return ()
+  in
+  exc_wrapper aux
