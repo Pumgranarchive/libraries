@@ -209,7 +209,7 @@ let print_youtube_video (id, title, url, description, categories) =
 ** return a list of video from a list of id
 *)
 let get_videos_from_ids video_ids =
-  try
+  try_lwt
     let youtube_url_http =
       create_video_url
         video_ids
@@ -225,7 +225,7 @@ let get_videos_from_ids video_ids =
 ** get a list of video from a research
 *)
 let search_video request max_result =
-  try
+  try_lwt
     let url =
       create_search_url
         request
@@ -245,7 +245,7 @@ let search_video request max_result =
 ** return a list of video from an id
 *)
 let get_videos_from_playlist_id playlist_id max_result =
-  try
+  try_lwt
     let get_id item = get_videoId_field (get_contentDetails_field item) in
     let rec aux playlist_id ?(page_token = None) max_result =
       let (max_result, next_max_result) =
@@ -280,7 +280,7 @@ let get_videos_from_playlist_id playlist_id max_result =
 ** - add max_result based on number channel expected
 *)
 let get_uploaded_videos_from_channel ids user_name =
-  try
+  try_lwt
     let youtube_url_http =
       create_channel_url_from_id
         ~id:ids

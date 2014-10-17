@@ -151,7 +151,7 @@ let print_freebase_object
 (*** requests ***)
 (* for now it is private, this function isn't finished *)
 let search query =
-  try
+  try_lwt
     let url = create_search_url query in
     lwt freebase_json = Http_request_manager.request url in
     Lwt.return (freebase_json)
@@ -162,7 +162,7 @@ let search query =
 ** return a list of freebase basic object from a list of topic_ids
 *)
 let get_topics ids =
-  try
+  try_lwt
     let url =
       create_topic_url
         ids
