@@ -1,4 +1,4 @@
-
+ c
 type title = string
 type abstract = string
 type rdf_type = string list
@@ -59,7 +59,7 @@ let print_discography
 
 
 let get_basic_informations name =
-  try
+  try_lwt
     let basic_query = Dbpedia_query.get_basic_query_infos name in
     (* let basic_of_pair pairs = *)
     (*   let title = get_value pairs "title" in *)
@@ -89,7 +89,7 @@ let get_basic_informations name =
   with e -> raise (Dbpedia (get_exc_string e))
 
 let get_discography name =
-  try
+  try_lwt
     let discography_query = Dbpedia_query.get_discography_query_infos name in
     (* let discography_of_pair pairs = *)
     (*   let song = get_value pairs "song" in *)
