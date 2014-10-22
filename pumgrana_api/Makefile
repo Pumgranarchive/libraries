@@ -1,6 +1,8 @@
 NAME :=		pumgrana_api
 
-ML :=		pumgrana.ml
+ML :=		conf.ml		\
+		utils.ml	\
+		pumgrana.ml
 
 MLI :=		pumgrana.mli
 
