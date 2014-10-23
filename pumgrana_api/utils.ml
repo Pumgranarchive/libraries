@@ -60,7 +60,7 @@ struct
       | h::t ->
         let i' = i + 1 in
         let old' = h::old in
-        if i' <= interval_size
+        if i' >= interval_size
         then aux 0 ((List.rev old')::build) [] t
         else aux i' build old' t
     in
