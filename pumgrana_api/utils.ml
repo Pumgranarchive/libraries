@@ -50,7 +50,13 @@ struct
 
   let split_to interval_size list =
     let rec aux i build old = function
-      | []   -> List.rev build
+      | []   ->
+        let build' =
+          if List.length old > 0
+          then (List.rev old)::build
+          else build
+        in
+        List.rev build'
       | h::t ->
         let i' = i + 1 in
         let old' = h::old in
