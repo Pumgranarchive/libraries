@@ -78,11 +78,18 @@ PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 
-SELECT ?song ?song_name ?album WHERE {
-  ?band_name dbprop:name \"" ^ band_name ^ "\"@en.
-  ?song dbpedia-owl:musicalArtist ?band_name.
-  ?song dbprop:name ?song_name.
-  ?song dbpprop:fromAlbum ?album
+SELECT DINSTINCT ?songs ?song_name ?album WHERE {
+{
+?band dbprop:name \"" ^ band_name ^ "\"@en.
+?albums dbpedia-owl:artist ?band
+?albums dbprop:title ?songs
+}
+UNION {
+?band dbprop:name  \"" ^ band_name ^ "\"@en.
+?songs dbpedia-owl:musicalArtist ?band.
+?songs dbprop:name ?song_name.
+?songs dbpprop:fromAlbum ?album
+}
 }"
   }
   in
