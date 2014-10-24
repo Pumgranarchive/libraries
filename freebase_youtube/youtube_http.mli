@@ -29,7 +29,7 @@ val print_youtube_video : video -> unit
 val get_videos_from_ids                         : video_id list -> video list Lwt.t
 
 (** get a list of video from a research *)
-val search_video                                : string -> int -> video list Lwt.t
+val search_video                                : ?query:string -> ?topic_id:string -> int -> video list Lwt.t
 
 (** return a list of video from an id *)
 val get_videos_from_playlist_id                 : string -> int -> video list Lwt.t
