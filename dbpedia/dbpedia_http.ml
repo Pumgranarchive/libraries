@@ -1,4 +1,4 @@
- c
+
 type title = string
 type abstract = string
 type rdf_type = string list
