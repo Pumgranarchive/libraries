@@ -40,13 +40,17 @@ let g_video_base_url = "https://www.youtube.com/watch?v="
 let get_exc_string e = "Youtube: " ^ (Printexc.to_string e)
 
 (*** Url creators ***)
-let create_search_url query parts fields max_results type_of_result =
+let create_search_url ?query ?topic_id parts fields max_results type_of_result =
+  let add_opt name = function
+    | Some value    -> "&" ^ name ^ "=" ^ value
+    | None      -> "" in
   g_api_base_url ^ "search"
   ^ "?type=" ^ type_of_result
   ^ "&part=" ^ parts
   ^ "&fields=" ^ fields
   ^ "&maxResults=" ^ max_results
-  ^ "&q=" ^ query
+  ^ (add_opt "&topicId=" topic_id)
+  ^ (add_opt "&q=" query)
   ^ "&key=" ^ g_youtube_api_key
 
 let create_video_url video_ids parts fields =
@@ -224,11 +228,12 @@ let get_videos_from_ids video_ids =
 (**
 ** get a list of video from a research
 *)
-let search_video request max_result =
+let search_video ?query ?topic_id max_result =
   try_lwt
     let url =
       create_search_url
-        request
+        ?query
+        ?topic_id
         "snippet"
         "items(id,snippet(title,description))"
         (string_of_int max_result)
