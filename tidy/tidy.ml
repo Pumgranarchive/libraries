@@ -20,22 +20,38 @@ let clean_xhtml xhtml =
   let ending = Str.regexp " ?</body>.*$" in
   Str.global_replace ending "" xhtml
 
-let xhtml_of_html string =
-  let file = rd_name () in
-  lwt oc = Lwt_io.open_file
-      ~flags:[Unix.O_CREAT;Unix.O_WRONLY]
-      ~mode:Lwt_io.Output
-      file
+type 'a mode =
+| Output of 'a Lwt_io.mode
+| Input of 'a Lwt_io.mode
+
+let output = Output Lwt_io.output
+let input = Input Lwt_io.input
+
+let my_open o_mode fname =
+  let mode, rw_flag = match o_mode with
+    | Output m -> m, Unix.O_WRONLY
+    | Input m -> m, Unix.O_RDONLY
   in
-  lwt () = Lwt_io.write oc string in
-  lwt () = Lwt_io.close oc in
-  let _ = Sys.command ("tidy -asxhtml -m "^file^" > /dev/null 2>&1") in
-  lwt ic = Lwt_io.open_file
-      ~flags:[Unix.O_CREAT;Unix.O_RDONLY]
-      ~mode:Lwt_io.Input
-      file
-  in
+  Lwt_io.open_file ~flags:[Unix.O_CREAT;rw_flag] ~mode fname
+
+let init fname html =
+  lwt oc = my_open output fname in
+  lwt () = Lwt_io.write oc html in
+  Lwt_io.close oc
+
+let exec fname =
+  let _ = Sys.command ("tidy -asxhtml -m "^fname^" > /dev/null 2>&1") in
+  lwt ic = my_open input fname in
   lwt result = Lwt_io.read ic in
   lwt () = Lwt_io.close ic in
-  Sys.remove file;
+  Lwt.return result
+
+let xhtml_of_html html =
+  let fname = rd_name () in
+  lwt () = init fname html in
+  lwt result =
+    try_lwt exec fname
+    with e -> (Sys.remove fname; raise e)
+  in
+  Sys.remove fname;
   Lwt.return (clean_xhtml result)
