@@ -5,6 +5,9 @@
 (** return the Some member associate of name, and None if not found *)
 val opt_member : string -> Yojson.Basic.json -> Yojson.Basic.json option
 
+(** not_null default value return default if value is `Null  *)
+val not_null : Yojson.Basic.json -> Yojson.Basic.json -> Yojson.Basic.json
+
 (** Extract a list from JSON array
     @raise Bad_format.
     `Null are assume as empty list. *)
