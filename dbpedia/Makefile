@@ -33,8 +33,8 @@ all:		$(NAME) lib
 
 re:		clean all
 
-$(NAME):	.depend $(CMI) $(CMX)
-		$(OCAMLOPT) -linkpkg $(CMX) -o $@
+$(NAME):	.depend $(CMI) $(CMO)
+		$(OCAMLC) -linkpkg $(CMO) -o $@
 
 
 lib:		.depend $(CMI) $(CMO)
