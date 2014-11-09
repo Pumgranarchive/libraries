@@ -1,4 +1,4 @@
-(* Allow type: string, int, float *)
+(* Allow type: string, int, float, uri *)
 
 (** Keys **)
 (* field_name * type * getter *)
@@ -17,5 +17,6 @@
 (** Types **)
 (* TypeName:key list *)
 
-Basic:[title; abstract; type; wikiPage; isPrimaryTopicOf; label; sameAs]
+LightWeight:[isPrimaryTopicOf; title; abstract]
+Basic:[title; abstract; wikiPage; isPrimaryTopicOf; label]
 Disco:[song; song_name; album]

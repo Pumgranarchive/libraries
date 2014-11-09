@@ -9,6 +9,7 @@ module Generic =
            | String of string
            | Int of int
            | Float of float
+           | Uri of Ptype.uri
 
       let to_string term =
         String (Rdf_term.string_of_term term)
@@ -18,6 +19,9 @@ module Generic =
 
       let to_float term =
         Float (float_of_string (Rdf_term.string_of_term term))
+
+      let to_uri term =
+        Uri (Ptype.uri_of_string (Rdf_term.string_of_term term))
 
       let data_of_key = function
           %%DATA_LIST%%
@@ -92,6 +96,12 @@ module Generic =
         match ret with
         | Float r -> r
         | _      -> failwith ((string_of_key key) ^ " : is not a float")
+
+      let get_uri keys res key =
+        let ret = get keys res key in
+        match ret with
+        | Uri r -> r
+        | _      -> failwith ((string_of_key key) ^ " : is not an uri")
 
     end;;
 

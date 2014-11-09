@@ -11,8 +11,10 @@ type url = string
 type name = string
 type album = string
 
-type basic = (title * abstract * rdf_type * wiki_page * is_primary_topic_of *
-                label * same_as)
+type lightweight = (is_primary_topic_of * title * abstract)
+
+type basic = (title * abstract * wiki_page * is_primary_topic_of *
+                label)
 type song = (url * title * album)
 
 exception Dbpedia of string
@@ -42,8 +44,15 @@ let get_exc_string e = "DBpedia: " ^ (Printexc.to_string e)
 ** PUBLIC
 *)
 
+
+let print_lightweight
+    (is_primary_topic_of, title,abstract) =
+  print_endline "--------";
+  print_endline title;
+  print_endline abstract
+
 let print_basic
-    (title,abstract,rdf_type,wiki_page,is_primary_topic_of,label,same_as) =
+    (title,abstract,wiki_page,is_primary_topic_of,label) =
   print_endline "--------";
   print_endline title;
   print_endline abstract;
@@ -56,6 +65,47 @@ let print_discography
   print_endline song;
   print_endline name;
   print_endline album
+
+
+(*
+uri_list =  Ptype.uri
+*)
+(* let get_minimal_information uris = *)
+(*   try_lwt *)
+(*     verifier si se sont bien des urls wiki *)
+         (* -> trouver une regex pour wiki *)
+(*     recup l'id ou le titre de la page grace a la regex*)
+(*     balancer cet id/titre dans spaqrl *)
+(*     return un objet "light" *)
+
+let is_wikipedia_uri uri =
+  let uri_reg =
+    Str.regexp "\\(https?://\\)?\\(www\\.\\)?\\(meta\\.\\)?\\(..\\.\\)?wikipedia\\.org/\\(wiki/\\)?\\([-A-Za-z0-9_]\\)*" in
+  Str.string_match uri_reg uri 0
+
+let get_minimal_informations uri =
+  (* let extract_id_from_uri uri = *)
+  (*   let id_start = Str.group_end 5 and id_end = Str.group_end 6 in *)
+  (*   String.sub uri id_start (id_end - id_start) *)
+  (* in *)
+  let minimal_informations_query = Dbpedia_query.get_minimal_informations_query_infos uri in
+  lwt dbpedia_results = Rdf_http.query
+      (Rdf_uri.uri "http://dbpedia.org/sparql")
+      Dbpedia_query.(minimal_informations_query.query)
+  in
+  let format record =
+      Dbpedia_record.LightWeight.(record.is_primary_topic_of, record.title, record.abstract)
+  in
+  let create_lightWeight =
+    let ret = Dbpedia_record.LightWeight.parse dbpedia_results in
+    List.map format ret
+  in
+  Lwt.return (if (is_wikipedia_uri uri) = false
+  then raise (Dbpedia "Dbpedia_http.get_minimal_informations: \"uri\" parameter must be a wikipedia uri")
+  else (create_lightWeight))
+
+
+  (* else print_endline (extract_id_from_uri uri)) *)
 
 
 let get_basic_informations name =
@@ -77,9 +127,9 @@ let get_basic_informations name =
         Dbpedia_query.(basic_query.query)
     in
     let format record =
-      Dbpedia_record.Basic.(record.title, record.abstract, [],
+      Dbpedia_record.Basic.(record.title, record.abstract,
                             record.wiki_page, record.is_primary_topic_of,
-                            record.label, [])
+                            record.label)
     in
     let ret = Dbpedia_record.Basic.parse dbpedia_results in
     (* let pairs_list = (Rdf_http.pairs_of_solutions ~display:false *)

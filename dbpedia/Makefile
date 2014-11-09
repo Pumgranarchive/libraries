@@ -13,7 +13,7 @@ MLI :=		dbpedia_query.mli	\
 		rdf_http.mli
 
 
-PACKAGES :=	lwt,cohttp,cohttp.lwt,rdf,rdf.lwt
+PACKAGES :=	lwt,cohttp,cohttp.lwt,rdf,rdf.lwt,ptools
 
 CMX :=		$(ML_EXEC:.ml=.cmx)
 CMO :=		$(ML:.ml=.cmo)
@@ -35,6 +35,7 @@ re:		clean all
 
 $(NAME):	.depend $(CMI) $(CMX)
 		$(OCAMLOPT) -linkpkg $(CMX) -o $@
+
 
 lib:		.depend $(CMI) $(CMO)
 		$(OCAMLC) -a $(CMO) -o $(NAME).cma

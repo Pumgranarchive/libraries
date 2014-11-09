@@ -1,5 +1,5 @@
 name="dbpedia"
 description="Dbpedia ocaml binding"
 version="0.1"
-depends="lwt,cohttp,cohttp.lwt,rdf,rdf.lwt"
+depends="lwt,cohttp,cohttp.lwt,rdf,rdf.lwt,ptools"
 archive(byte)="dbpedia.cma"
