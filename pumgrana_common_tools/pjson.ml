@@ -7,6 +7,11 @@ let opt_member name json =
   | `Null -> None
   | res   -> Some res
 
+let not_null default value =
+  match value with
+  | `Null -> default
+  | v     -> v
+
 let to_list = function
   | `Null   -> []
   | `List l -> l
