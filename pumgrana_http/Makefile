@@ -1,10 +1,10 @@
-NAME :=		pumgrana_api
+NAME :=		pumgrana_http
 
 ML :=		conf.ml		\
 		utils.ml	\
-		pumgrana.ml
+		pumgrana_http.ml
 
-MLI :=		pumgrana.mli
+MLI :=		pumgrana_http.mli
 
 
 PACKAGES :=	lwt,cohttp,cohttp.lwt,rdf,str,yojson,ptools
