@@ -34,6 +34,15 @@ let get_contents ?filter ?tags_uri () =
   in
   Exc.wrapper aux
 
+let research_contents ?filter research =
+  let aux () =
+    let str_filter = Common.map Common.string_of_filter filter in
+    let parameters = Common.(add_p str_filter "") ^ "/" ^ research in
+    lwt json = Http.get Conf.research_contents_uri parameters in
+    Lwt.return (Pdeserialize.(get_service_return get_short_content_list json))
+  in
+  Exc.wrapper aux
+
 let insert_content title summary body ?tags_uri () =
   let aux () =
     let json = `Assoc (Json.add "tags_uri" Json.of_uris tags_uri
@@ -91,6 +100,13 @@ let tags_by_type type_name =
   in
   Exc.wrapper aux
 
+let tags_from_research research =
+  let aux () =
+    lwt json = Http.get Conf.research_tag_content_uri research in
+    Lwt.return (Pdeserialize.(get_service_return get_tag_list json))
+  in
+  Exc.wrapper aux
+
 let tags_from_content content_uri =
   let aux () =
     let parameter = Ptype.uri_encode (Ptype.string_of_uri content_uri) in
@@ -137,6 +153,15 @@ let get_link_detail link_id =
     lwt json = Http.get Conf.link_detail_uri parameter in
     let ret = Pdeserialize.(get_service_return get_detail_link_list json) in
     Lwt.return (List.hd ret)
+  in
+  Exc.wrapper aux
+
+let links_from_research content_uri research =
+  let aux () =
+    let encoded_uri = Ptype.uri_encode (Ptype.string_of_uri content_uri) in
+    let parameter = encoded_uri ^ "/" ^ research in
+    lwt json = Http.get Conf.research_link_content_uri parameter in
+    Lwt.return (Pdeserialize.(get_service_return get_link_list json))
   in
   Exc.wrapper aux
 
