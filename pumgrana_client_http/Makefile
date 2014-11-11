@@ -1,6 +1,6 @@
 VPATH =		../pumgrana_common_http
 
-NAME :=		pumgrana_http
+NAME :=		pumgrana_client_http
 
 ML :=		$(VPATH)/ph_conf.ml	\
 		$(VPATH)/ph_utils.ml	\
@@ -9,7 +9,7 @@ ML :=		$(VPATH)/ph_conf.ml	\
 MLI :=		$(VPATH)/pumgrana_http.mli
 
 
-PACKAGES :=	lwt,cohttp,cohttp.lwt,yojson,str,rdf,ptools
+PACKAGES :=	lwt,cohttp,cohttp.lwt,yojson,pctools
 
 CMX :=		$(ML:.ml=.cmx)
 CMO :=		$(ML:.ml=.cmo)

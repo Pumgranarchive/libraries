@@ -138,7 +138,7 @@ struct
 
   let get uri parameters =
     let headers = base_headers () in
-    let uri = !Conf.pumgrana_api_uri ^ uri ^ parameters in
+    let uri = !Ph_conf.pumgrana_api_uri ^ uri ^ parameters in
     let uri = Uri.of_string uri in
     lwt header, body =
         try Cohttp_lwt_unix.Client.get ~headers uri
@@ -155,7 +155,7 @@ struct
   let post uri json =
     let data = Yojson.to_string json in
     let headers = post_headers (String.length data) in
-    let uri = Uri.of_string (!Conf.pumgrana_api_uri ^ uri) in
+    let uri = Uri.of_string (!Ph_conf.pumgrana_api_uri ^ uri) in
     let body = ((Cohttp.Body.of_string data) :> Cohttp_lwt_body.t) in
     lwt h, body =
         try Cohttp_lwt_unix.Client.post ~body ~chunked:false ~headers uri
