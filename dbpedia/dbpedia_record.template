@@ -30,19 +30,25 @@ module Generic =
         let func, name = data_of_key key in
         name
 
+      let string_of_value = function
+        | String s -> s
+        | Int i    -> string_of_int i
+        | Float f  -> string_of_float f
+        | Uri u    -> Ptype.string_of_uri u
+
       let function_of_key key =
         let func, name = data_of_key key in
         func
 
       let values_of_solutions keys solutions =
         let get_pair solution =
-          let aux l key =
+          let aux key =
             let convert_f, str_key = data_of_key key in
             if Rdf_sparql.is_bound solution str_key
-            then convert_f (Rdf_sparql.get_term solution str_key)::l
+            then convert_f (Rdf_sparql.get_term solution str_key)
             else raise (Not_found str_key)
           in
-          List.fold_left aux [] keys
+          List.map aux keys
         in
         List.map get_pair solutions
 
@@ -65,15 +71,14 @@ module Generic =
       let get keys res key =
         let get_pos select_f list =
           let rec aux select_f count = function
+            | []        -> raise (Not_found (string_of_key key))
             | k::tail   ->
+              (* Printf.printf "%s :: %s\n" (string_of_key k) (string_of_value (List.nth res count)); *)
               if select_f k
               then count
               else aux select_f (count + 1) tail
-            | []        -> count
           in
-          let pos = aux select_f 0 list in
-          if pos < List.length list then pos
-          else raise (Not_found (string_of_key key))
+          aux select_f 0 list
         in
         let compare k = key_compare k key = 0 in
         let pos = get_pos compare keys in
