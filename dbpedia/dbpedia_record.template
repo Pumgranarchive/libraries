@@ -20,7 +20,7 @@ module Generic =
       let to_float term =
         Float (float_of_string (Rdf_term.string_of_term term))
 
-      let to_uri term =
+      let to_ptype_uri term =
         Uri (Ptype.uri_of_string (Rdf_term.string_of_term term))
 
       let data_of_key = function
@@ -102,7 +102,7 @@ module Generic =
         | Float r -> r
         | _      -> failwith ((string_of_key key) ^ " : is not a float")
 
-      let get_uri keys res key =
+      let get_ptype_uri keys res key =
         let ret = get keys res key in
         match ret with
         | Uri r -> r

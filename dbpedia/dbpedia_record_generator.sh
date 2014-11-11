@@ -136,12 +136,15 @@ for a in "${FIELD_ARRAY[@]}"; do
     field=${FIELD_ARRAY[$i]}
     key=$(to_key "$field")
     type=${TYPE_ARRAY[$i]}
+    func=`echo "$type" | tr '[:upper:]' '[:lower:]'`
+    func=`echo "$func" | sed -e "s#\.#_#g"`
+    func="to_$func"
     getter=${GETTER_ARRAY[$i]}
     if [ "$key_list" != "" ]; then
         key_list="$key_list | "
     fi
     key_list="$key_list$key"
-    data_list="$data_list | $key -> (to_$type, \"$field\")\n"
+    data_list="$data_list | $key -> ($func, \"$field\")\n"
 
     i=$(($i+1));
 
@@ -152,7 +155,7 @@ for tkeys in "${TYPE_KEY_ARRAY[@]}"; do
 
     type_name=${TYPE_NAME_ARRAY[$i]}
     keys=$(echo $tkeys | tr " " "\n")
-    sig_name=`echo "$type_name" | tr a-z A-Z`
+    sig_name=`echo "$type_name" | tr '[:lower:]' '[:upper:]'`
 
     set -f
     IFS='
@@ -173,12 +176,15 @@ for tkeys in "${TYPE_KEY_ARRAY[@]}"; do
         # echo "call [$k]"
         getter=$(get_getter $k)
         type=$(get_type $k)
+        func=`echo "$type" | tr '[:upper:]' '[:lower:]'`
+        func=`echo "$func" | sed -e "s#\.#_#g"`
+        func="get_$func"
         record="$record $getter : $type"
 
         if [ "$module_getters" != "" ]; then
             module_getters="$module_getters;"
         fi
-        module_getters="$module_getters $getter = Generic.get_$type keys v Generic.$k"
+        module_getters="$module_getters $getter = Generic.$func keys v Generic.$k"
 
     done
 
