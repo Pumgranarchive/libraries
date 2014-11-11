@@ -13,8 +13,8 @@ type album = string
 
 type lightweight = Dbpedia_record.LightWeight.t
 
-type basic = (title * abstract * wiki_page * is_primary_topic_of *
-                label)
+type basic = Dbpedia_record.Basic.t
+
 type song = (url * title * album)
 
 exception Dbpedia of string
@@ -51,13 +51,15 @@ let print_lightweight record =
     print_endline ("title: " ^ Dbpedia_record.LightWeight.(record.title));
     print_endline ("abstract: " ^ Dbpedia_record.LightWeight.(record.abstract))
 
-let print_basic
-    (title,abstract,wiki_page,is_primary_topic_of,label) =
+let print_basic record =
   print_endline "--------";
-  print_endline title;
-  print_endline abstract;
-  print_endline wiki_page;
-  print_endline is_primary_topic_of
+  (Printf.printf "title: %s\nabstract: %s\nwiki_page: %s\nis_primary_topic_of: %s\nsubject: %s\n"
+     Dbpedia_record.Basic.(record.title)
+     Dbpedia_record.Basic.(record.abstract)
+     Dbpedia_record.Basic.(record.wiki_page)
+     Dbpedia_record.Basic.(record.is_primary_topic_of)
+     Dbpedia_record.Basic.(record.subject)
+  )
 
 let print_discography
     (song, name, album) =
@@ -93,8 +95,6 @@ let get_minimal_informations uri =
   else (create_lightWeight))
 
 
-  (* else print_endline (extract_id_from_uri uri)) *)
-
 
 let get_basic_informations name =
   try_lwt
@@ -115,9 +115,10 @@ let get_basic_informations name =
         Dbpedia_query.(basic_query.query)
     in
     let format record =
-      Dbpedia_record.Basic.(record.title, record.abstract,
-                            record.wiki_page, record.is_primary_topic_of,
-                            record.label)
+      record
+      (* Dbpedia_record.Basic.(record.title, record.abstract, *)
+      (*                       record.wiki_page, record.is_primary_topic_of, *)
+      (*                       record.label) *)
     in
     let ret = Dbpedia_record.Basic.parse dbpedia_results in
     (* let pairs_list = (Rdf_http.pairs_of_solutions ~display:false *)

@@ -13,8 +13,8 @@ type album = string
 
 type lightweight = Dbpedia_record.LightWeight.t
 
-type basic = (title * abstract * wiki_page * is_primary_topic_of *
-                label)
+type basic = Dbpedia_record.Basic.t
+
 type song = (url * title * album)
 
 exception Dbpedia of string

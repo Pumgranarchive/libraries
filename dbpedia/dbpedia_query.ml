@@ -72,8 +72,9 @@ PREFIX owl: <http://www.w3.org/2002/07/owl#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX dbterms: <http://purl.org/dc/terms/>
 
-SELECT DISTINCT ?title ?abstract ?wikiPage ?isPrimaryTopicOf ?label
+SELECT DISTINCT ?title ?abstract ?wikiPage ?isPrimaryTopicOf ?label ?subject
 WHERE
 {
 
@@ -83,6 +84,7 @@ WHERE
    ?band dbpedia-owl:wikiPageID ?wikiPage.
    ?band foaf:isPrimaryTopicOf ?isPrimaryTopicOf.
    ?band rdfs:label ?label.
+   ?band dcterms:subject ?subject.
 
    FILTER (lang(?title) = '' || lang(?title) = 'en')
    FILTER (lang(?abstract) = '' || lang(?abstract) = 'en')
