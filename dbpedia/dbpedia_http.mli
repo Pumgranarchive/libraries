@@ -11,7 +11,7 @@ type url = string
 type name = string
 type album = string
 
-type lightweight = (is_primary_topic_of * title * abstract)
+type lightweight = Dbpedia_record.LightWeight.t
 
 type basic = (title * abstract * wiki_page * is_primary_topic_of *
                 label)
@@ -30,11 +30,11 @@ val print_basic : basic -> unit
 val print_discography : song -> unit
 
 (*** Requests ***)
-(** execute a sparql request and return a list of basic object **)
-val get_basic_informations : string -> basic list Lwt.t
-
 (** execute a sparql request and return a list of light object **)
 val get_minimal_informations : string ->  lightweight list Lwt.t
+
+(** execute a sparql request and return a list of basic object **)
+val get_basic_informations : string -> basic list Lwt.t
 
 (** execute a sparql request and return a list of songs **)
 val get_discography : string -> song list Lwt.t

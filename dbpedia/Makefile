@@ -8,8 +8,8 @@ ML :=		dbpedia_query.ml	\
 ML_EXEC :=	$(ML)			\
 		bot.ml
 
-MLI :=		dbpedia_query.mli	\
-		dbpedia_record.mli	\
+MLI :=		dbpedia_record.mli	\
+		dbpedia_query.mli	\
 		dbpedia_http.mli	\
 		rdf_http.mli
 
@@ -18,6 +18,7 @@ PACKAGES :=	lwt,cohttp,cohttp.lwt,rdf,rdf.lwt,ptools
 
 CMX :=		$(ML_EXEC:.ml=.cmx)
 CMO :=		$(ML:.ml=.cmo)
+CMO_EXEC :=	$(ML_EXEC:.ml=.cmo)
 CMI :=		$(MLI:.mli=.cmi)
 LIB :=		-package $(PACKAGES)
 SYNTAX :=	-syntax camlp4o -package lwt.syntax
@@ -34,8 +35,8 @@ all:		$(NAME) lib
 
 re:		clean all
 
-$(NAME):	.depend $(CMI) $(CMO)
-		$(OCAMLC) -linkpkg $(CMO) -o $@
+$(NAME):	.depend $(CMI) $(CMO_EXEC)
+		$(OCAMLC) -linkpkg $(CMO_EXEC) -o $@
 
 
 lib:		.depend $(CMI) $(CMO)

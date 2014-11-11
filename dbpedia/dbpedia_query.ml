@@ -33,9 +33,8 @@ type sparql_information = { keys : string list; query : string}
 
 let get_minimal_informations_query_infos wiki_uri =
   let aux = {
-    (* basic = [Title | Abstract]; *)
     keys =
-      ["title";"abstract"];
+      ["isPrimaryTopicOf";"title";"abstract"];
     query = "PREFIX dbpedia-owl: <http://dbpedia.org/ontology/>
 PREFIX dbres: <http://dbpedia.org/resource/>
 PREFIX dbprop: <http://dbpedia.org/property/>
@@ -44,10 +43,11 @@ PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 
-SELECT DISTINCT ?title ?abstract
+SELECT DISTINCT ?isPrimaryTopicOf ?title ?abstract
 WHERE
 {
    ?band foaf:isPrimaryTopicOf <" ^ wiki_uri ^ ">.
+   ?band foaf:isPrimaryTopicOf ?isPrimaryTopicOf.
    ?band dbprop:name ?title.
    ?band dbpedia-owl:abstract ?abstract.
 
@@ -83,7 +83,7 @@ WHERE
    ?band dbpedia-owl:wikiPageID ?wikiPage.
    ?band foaf:isPrimaryTopicOf ?isPrimaryTopicOf.
    ?band rdfs:label ?label.
-x
+
    FILTER (lang(?title) = '' || lang(?title) = 'en')
    FILTER (lang(?abstract) = '' || lang(?abstract) = 'en')
    FILTER (lang(?label) = '' || lang(?label) = 'en')

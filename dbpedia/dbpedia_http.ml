@@ -11,7 +11,7 @@ type url = string
 type name = string
 type album = string
 
-type lightweight = (is_primary_topic_of * title * abstract)
+type lightweight = Dbpedia_record.LightWeight.t
 
 type basic = (title * abstract * wiki_page * is_primary_topic_of *
                 label)
@@ -45,11 +45,11 @@ let get_exc_string e = "DBpedia: " ^ (Printexc.to_string e)
 *)
 
 
-let print_lightweight
-    (is_primary_topic_of, title,abstract) =
-  print_endline "--------";
-  print_endline title;
-  print_endline abstract
+let print_lightweight record =
+    print_endline "--- Lightweight ---";
+    print_endline ("is_primary_topic_of: " ^ Dbpedia_record.LightWeight.(record.is_primary_topic_of));
+    print_endline ("title: " ^ Dbpedia_record.LightWeight.(record.title));
+    print_endline ("abstract: " ^ Dbpedia_record.LightWeight.(record.abstract))
 
 let print_basic
     (title,abstract,wiki_page,is_primary_topic_of,label) =
@@ -67,34 +67,22 @@ let print_discography
   print_endline album
 
 
-(*
-uri_list =  Ptype.uri
-*)
-(* let get_minimal_information uris = *)
-(*   try_lwt *)
-(*     verifier si se sont bien des urls wiki *)
-         (* -> trouver une regex pour wiki *)
-(*     recup l'id ou le titre de la page grace a la regex*)
-(*     balancer cet id/titre dans spaqrl *)
-(*     return un objet "light" *)
-
 let is_wikipedia_uri uri =
   let uri_reg =
     Str.regexp "\\(https?://\\)?\\(www\\.\\)?\\(meta\\.\\)?\\(..\\.\\)?wikipedia\\.org/\\(wiki/\\)?\\([-A-Za-z0-9_]\\)*" in
   Str.string_match uri_reg uri 0
 
+(*
+uri_list =  Ptype.uri
+*)
 let get_minimal_informations uri =
-  (* let extract_id_from_uri uri = *)
-  (*   let id_start = Str.group_end 5 and id_end = Str.group_end 6 in *)
-  (*   String.sub uri id_start (id_end - id_start) *)
-  (* in *)
   let minimal_informations_query = Dbpedia_query.get_minimal_informations_query_infos uri in
   lwt dbpedia_results = Rdf_http.query
       (Rdf_uri.uri "http://dbpedia.org/sparql")
       Dbpedia_query.(minimal_informations_query.query)
   in
   let format record =
-      Dbpedia_record.LightWeight.(record.is_primary_topic_of, record.title, record.abstract)
+      record
   in
   let create_lightWeight =
     let ret = Dbpedia_record.LightWeight.parse dbpedia_results in
