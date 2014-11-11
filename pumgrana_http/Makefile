@@ -2,9 +2,9 @@ NAME :=		pumgrana_http
 
 ML :=		conf.ml		\
 		utils.ml	\
-		pumgrana_http.ml
+		$(NAME).ml
 
-MLI :=		pumgrana_http.mli
+MLI :=		$(NAME).mli
 
 
 PACKAGES :=	lwt,cohttp,cohttp.lwt,rdf,str,yojson,ptools
@@ -33,8 +33,8 @@ $(NAME):	.depend $(CMI) $(CMO)
 lib:		.depend $(CMI) $(CMO)
 		$(OCAMLC) -a $(CMO) -o $(NAME).cma
 
-install:	lib $(CMI) $(CMX) $(CMO)
-		$(OCAMLFIND) install $(NAME) META $(NAME).cma $(CMI) $(CMX) $(CMO)
+install:	lib $(NAME).cmi $(NAME).cmx $(NAME).cmo
+		$(OCAMLFIND) install $(NAME) META $(NAME).cma $(NAME).cmi $(NAME).cmx $(NAME).cmo
 
 uninstall:
 		$(OCAMLFIND) remove $(NAME)
