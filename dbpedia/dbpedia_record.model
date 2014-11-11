@@ -13,10 +13,11 @@
 (song, string, song)
 (song_name, string, song_name)
 (album, string, album)
+(subject, string, subject)
 
 (** Types **)
 (* TypeName:key list *)
 
 LightWeight:[isPrimaryTopicOf; title; abstract]
-Basic:[title; abstract; wikiPage; isPrimaryTopicOf; label]
+Basic:[title; abstract; wikiPage; isPrimaryTopicOf; label; subject;]
 Disco:[song; song_name; album]
