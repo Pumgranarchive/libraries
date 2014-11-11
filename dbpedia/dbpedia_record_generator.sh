@@ -2,6 +2,7 @@
 
 TEMPLATE="dbpedia_record.template"
 ML="dbpedia_record.ml"
+MLI="dbpedia_record.mli"
 MODEL="dbpedia_record.model"
 
 to_key () {
@@ -129,6 +130,7 @@ i=0
 key_list=""
 data_list=""
 declare -a MODULE_ARRAY
+declare -a MODULE_SIG_ARRAY
 for a in "${FIELD_ARRAY[@]}"; do
 
     field=${FIELD_ARRAY[$i]}
@@ -150,6 +152,7 @@ for tkeys in "${TYPE_KEY_ARRAY[@]}"; do
 
     type_name=${TYPE_NAME_ARRAY[$i]}
     keys=$(echo $tkeys | tr " " "\n")
+    sig_name=`echo "$type_name" | tr a-z A-Z`
 
     set -f
     IFS='
@@ -179,7 +182,9 @@ for tkeys in "${TYPE_KEY_ARRAY[@]}"; do
 
     done
 
-    MODULE_ARRAY[$i]="\nmodule $type_name =\n struct\n type t = {$record}\n let keys = [$module_key]\n let parse solutions =\n let values = Generic.parse keys solutions in\n List.map (fun v -> {$module_getters}) values\n end;;\n"
+    sig="module type $sig_name =\nsig\ntype t = {$record}\nval parse: Rdf_sparql.solution list -> t list\nend;;";
+    MODULE_ARRAY[$i]="\n$sig\n\nmodule $type_name : $sig_name =\nstruct\ntype t = {$record}\nlet keys = [$module_key]\nlet parse solutions =\nlet values = Generic.parse keys solutions in\nList.map (fun v -> {$module_getters}) values\nend;;\n"
+    MODULE_SIG_ARRAY[$i]="\n$sig\nmodule $type_name : $sig_name\n"
 
     i=$(($i+1));
 
@@ -187,3 +192,6 @@ done
 
 modules="${MODULE_ARRAY[@]}"
 cat $TEMPLATE | sed -e "s#\%\%KEY_LIST\%\%#$key_list#g" -e "s#\%\%DATA_LIST\%\%#$data_list#g" -e "s#\%\%MODULES\%\%#$modules#g" > $ML
+
+sig_modules="${MODULE_SIG_ARRAY[@]}"
+echo -e "$sig_modules" > $MLI

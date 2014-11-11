@@ -9,6 +9,7 @@ ML_EXEC :=	$(ML)			\
 		bot.ml
 
 MLI :=		dbpedia_query.mli	\
+		dbpedia_record.mli	\
 		dbpedia_http.mli	\
 		rdf_http.mli
 
