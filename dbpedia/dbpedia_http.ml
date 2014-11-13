@@ -48,17 +48,20 @@ let get_exc_string e = "DBpedia: " ^ (Printexc.to_string e)
 let print_lightweight record =
   let open Dbpedia_record.LightWeight in
   print_endline "--- Lightweight ---";
-  print_endline ("is_primary_topic_of: " ^ record.is_primary_topic_of);
-  print_endline ("title: " ^ record.title);
-  print_endline ("abstract: " ^ record.abstract)
+  (Printf.printf "title: %s\nabstract: %s\nis_primary_topic_of: %s\n"
+     (Ptype.string_of_uri record.is_primary_topic_of)
+     record.title
+     record.abstract
+  )
 
 let print_basic record =
+  let open Dbpedia_record.LightWeight in
   print_endline "--------";
   (Printf.printf "title: %s\nabstract: %s\nwiki_page: %s\nis_primary_topic_of: %s\nsubject: %s\n"
      Dbpedia_record.Basic.(record.title)
      Dbpedia_record.Basic.(record.abstract)
      Dbpedia_record.Basic.(record.wiki_page)
-     Dbpedia_record.Basic.(record.is_primary_topic_of)
+     Dbpedia_record.Basic.(Ptype.string_of_uri record.is_primary_topic_of)
      Dbpedia_record.Basic.(record.subject)
   )
 

@@ -1,4 +1,4 @@
-(* Allow type: string, int, float, uri *)
+(* Allow type: string, int, float, Ptype.uri *)
 
 (** Keys **)
 (* field_name * type * getter *)

@@ -11,17 +11,18 @@ module Generic =
            | Float of float
            | Uri of Ptype.uri
 
-      let to_string term =
-        String (Rdf_term.string_of_term term)
+      let to_string term key=
+        String (Rdf_sparql.get_string term key)
 
-      let to_int term =
-        Int (int_of_string (Rdf_term.string_of_term term))
+      let to_int term key =
+        Int (Rdf_sparql.get_int term key)
 
-      let to_float term =
-        Float (float_of_string (Rdf_term.string_of_term term))
+      let to_float term key =
+        Float (Rdf_sparql.get_float term key)
 
-      let to_ptype_uri term =
-        Uri (Ptype.uri_of_string (Rdf_term.string_of_term term))
+      let to_ptype_uri term key =
+        let iri = (Rdf_sparql.get_iri term (Rdf_iri.iri ~check:false "") key) in
+        Uri (Ptype.uri_of_string (Rdf_iri.string iri))
 
       let data_of_key = function
           %%DATA_LIST%%
@@ -45,7 +46,7 @@ module Generic =
           let aux key =
             let convert_f, str_key = data_of_key key in
             if Rdf_sparql.is_bound solution str_key
-            then convert_f (Rdf_sparql.get_term solution str_key)
+            then convert_f solution str_key
             else raise (Not_found str_key)
           in
           List.map aux keys
