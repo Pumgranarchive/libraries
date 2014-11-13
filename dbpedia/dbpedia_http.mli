@@ -19,6 +19,9 @@ type song = (url * title * album)
 
 exception Dbpedia of string
 
+(*** utils  *)
+val is_wikipedia_uri : string -> bool
+
 (*** Printing ***)
 (** Print a lightweight dbpedia object on stdout *)
 val print_lightweight : lightweight -> unit
