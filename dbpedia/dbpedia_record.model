@@ -13,7 +13,7 @@
 (song, string, song)
 (song_name, string, song_name)
 (album, string, album)
-(subject, string, subject)
+(subject, string list, subject)
 
 (** Types **)
 (* TypeName:key list *)

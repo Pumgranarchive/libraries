@@ -74,7 +74,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 PREFIX dbterms: <http://purl.org/dc/terms/>
 
-SELECT DISTINCT ?title ?abstract ?wikiPage ?isPrimaryTopicOf ?label ?subject
+SELECT DISTINCT ?title ?abstract ?wikiPage ?isPrimaryTopicOf ?label (group_concat(distinct ?subject;separator=\";\") as ?subject)
 WHERE
 {
 

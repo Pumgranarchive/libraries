@@ -40,6 +40,10 @@ let get_values pairs key_to_find =
 
 let get_exc_string e = "DBpedia: " ^ (Printexc.to_string e)
 
+let rec string_of_list = function
+  | h::t      -> (h ^ "\n" ^ string_of_list t)
+  | []        -> ""
+
 (*
 ** PUBLIC
 *)
@@ -62,7 +66,7 @@ let print_basic record =
      Dbpedia_record.Basic.(record.abstract)
      Dbpedia_record.Basic.(record.wiki_page)
      Dbpedia_record.Basic.(Ptype.string_of_uri record.is_primary_topic_of)
-     Dbpedia_record.Basic.(record.subject)
+     Dbpedia_record.Basic.((string_of_list record.subject))
   )
 
 let print_discography
