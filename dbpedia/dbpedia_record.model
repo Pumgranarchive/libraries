@@ -6,7 +6,7 @@
 (title, string, title)
 (abstract, string, abstract)
 (type, string, type_v)
-(wikiPage, string, wiki_page)
+(wikiPage, string, wiki_page_id)
 (isPrimaryTopicOf, Ptype.uri, is_primary_topic_of)
 (label, string, label)
 (sameAs, string, same_as)
