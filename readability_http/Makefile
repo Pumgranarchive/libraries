@@ -1,8 +1,8 @@
-NAME :=		readability
+NAME :=		readability_http
 
-ML :=		readability.ml
+ML :=		readability_http.ml
 
-MLI :=		readability.mli
+MLI :=		readability_http.mli
 
 PACKAGES :=	cohttp,cohttp.lwt,rdf,yojson
 
