@@ -6,23 +6,30 @@ module Generic =
       type key = %%KEY_LIST%%
 
       type result =
+           | List of result list
            | String of string
            | Int of int
            | Float of float
            | Uri of Ptype.uri
 
-      let to_string term key=
-        String (Rdf_sparql.get_string term key)
+      let string_of_string str = String str
+      let to_string term key = String (Rdf_sparql.get_string term key)
 
-      let to_int term key =
-        Int (Rdf_sparql.get_int term key)
+      let int_of_string str = Int (int_of_string str)
+      let to_int term key = Int (Rdf_sparql.get_int term key)
 
-      let to_float term key =
-        Float (Rdf_sparql.get_float term key)
+      let float_of_string str = Float (float_of_string str)
+      let to_float term key = Float (Rdf_sparql.get_float term key)
 
+      let ptype_uri_of_string str = Uri (Ptype.uri_of_string str)
       let to_ptype_uri term key =
         let iri = (Rdf_sparql.get_iri term (Rdf_iri.iri ~check:false "") key) in
-        Uri (Ptype.uri_of_string (Rdf_iri.string iri))
+        ptype_uri_of_string (Rdf_iri.string iri)
+
+      let to_list type_of_string term key =
+        let str = Rdf_sparql.get_string term key in
+        let list = Str.split (Str.regexp ";") str in
+        List (List.map type_of_string list)
 
       let data_of_key = function
           %%DATA_LIST%%
@@ -31,11 +38,11 @@ module Generic =
         let func, name = data_of_key key in
         name
 
-      let string_of_value = function
-        | String s -> s
-        | Int i    -> string_of_int i
-        | Float f  -> string_of_float f
-        | Uri u    -> Ptype.string_of_uri u
+      (* let string_of_value = function
+          | String s -> s
+          | Int i    -> string_of_int i
+          | Float f  -> string_of_float f
+          | Uri u    -> Ptype.string_of_uri u *)
 
       let function_of_key key =
         let func, name = data_of_key key in
@@ -85,29 +92,28 @@ module Generic =
         let pos = get_pos compare keys in
         List.nth res pos
 
-      let get_string keys res key =
-        let ret = get keys res key in
-        match ret with
+      let get_string key = function
         | String r -> r
         | _        -> failwith ((string_of_key key) ^ " : is not a string")
 
-      let get_int keys res key =
-        let ret = get keys res key in
-        match ret with
+      let get_int key = function
         | Int r -> r
         | _     -> failwith ((string_of_key key) ^ " : is not an int")
 
-      let get_float keys res key =
-        let ret = get keys res key in
-        match ret with
+      let get_float key = function
         | Float r -> r
         | _      -> failwith ((string_of_key key) ^ " : is not a float")
 
-      let get_ptype_uri keys res key =
-        let ret = get keys res key in
-        match ret with
+      let get_ptype_uri key = function
         | Uri r -> r
         | _      -> failwith ((string_of_key key) ^ " : is not an uri")
+
+      let get_list func key = function
+        | List l -> List.map (func key) l
+        | _      -> failwith ((string_of_key key) ^ " : is not a list")
+
+      let get_type func keys res key =
+        func key (get keys res key)
 
     end;;
 

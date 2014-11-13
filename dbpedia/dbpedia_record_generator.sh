@@ -138,7 +138,13 @@ for a in "${FIELD_ARRAY[@]}"; do
     type=${TYPE_ARRAY[$i]}
     func=`echo "$type" | tr '[:upper:]' '[:lower:]'`
     func=`echo "$func" | sed -e "s#\.#_#g"`
-    func="to_$func"
+    test_list=`echo "$func" | grep " list"`
+    if [ "$test_list" != "" ]; then
+        func=`echo "$func" | sed -e "s# list##g"`
+        func="(to_list "$func"_of_string)"
+    else
+        func="to_$func"
+    fi
     getter=${GETTER_ARRAY[$i]}
     if [ "$key_list" != "" ]; then
         key_list="$key_list | "
@@ -178,13 +184,20 @@ for tkeys in "${TYPE_KEY_ARRAY[@]}"; do
         type=$(get_type $k)
         func=`echo "$type" | tr '[:upper:]' '[:lower:]'`
         func=`echo "$func" | sed -e "s#\.#_#g"`
-        func="get_$func"
+        test_list=`echo "$func" | grep " list"`
+        if [ "$test_list" != "" ]; then
+            func=`echo "$func" | sed -e "s# list##g"`
+            func="(get_list get_"$func")"
+        else
+            func="get_$func"
+        fi
+        func="(get_type $func)"
         record="$record $getter : $type"
 
         if [ "$module_getters" != "" ]; then
             module_getters="$module_getters;"
         fi
-        module_getters="$module_getters $getter = Generic.$func keys v Generic.$k"
+        module_getters="$module_getters $getter = Generic.($func keys v $k)"
 
     done
 

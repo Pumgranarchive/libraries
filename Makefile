@@ -1,6 +1,7 @@
-DIRECTORIES :=	pumgrana_client_tools	\
-		pumgrana_tools		\
+DIRECTORIES :=	pumgrana_tools		\
+		pumgrana_client_tools	\
 		pumgrana_http		\
+		pumgrana_client_http	\
 		readability		\
 		freebase_youtube	\
 		dbpedia			\
