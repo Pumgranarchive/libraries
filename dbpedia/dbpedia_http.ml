@@ -23,21 +23,6 @@ exception Dbpedia of string
 ** PRIVATE
 *)
 
-let get_value pairs key_to_find =
-  let is_key_equal (key, value) = (key = key_to_find)
-  in
-  let find_key pairs =
-    let exist = List.exists is_key_equal pairs in
-    if exist then List.find is_key_equal pairs else (key_to_find, "")in
-  let (key, value) = find_key pairs in
-  value
-
-let get_values pairs key_to_find =
-  let is_key_equal (key, value) = (key = key_to_find) in
-  let current_pairs = List.find_all is_key_equal pairs in
-  let get_value (key, value) = value in
-  List.map get_value current_pairs
-
 let get_exc_string e = "DBpedia: " ^ (Printexc.to_string e)
 
 let rec string_of_list = function
