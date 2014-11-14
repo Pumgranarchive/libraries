@@ -3,6 +3,7 @@ DIRECTORIES :=	pumgrana_tools		\
 		pumgrana_http		\
 		pumgrana_client_http	\
 		readability_http	\
+		opencalais_http		\
 		freebase_youtube	\
 		dbpedia			\
 		tidy
