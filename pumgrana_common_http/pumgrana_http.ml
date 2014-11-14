@@ -14,6 +14,14 @@ let set_pumgrana_api_uri uri =
 ********************************* Content *************************************
 *******************************************************************************)
 
+let uri_from_platform platform_name content_name =
+  let aux () =
+    let parameter = platform_name ^ "/" ^ (Ptype.uri_encode content_name) in
+    lwt json = Http.get Ph_conf.uri_from_platform parameter in
+    Lwt.return (Pdeserialize.get_content_uri_return json)
+  in
+  Exc.wrapper aux
+
 let get_content_detail content_uri =
   let aux () =
     let parameter = Ptype.uri_encode (Ptype.string_of_uri content_uri) in
