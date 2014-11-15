@@ -1,23 +1,15 @@
-NAME :=		bfy
+NAME :=		readability_http
 
-ML :=		yojson_wrap.ml		\
-		bfy_helpers.ml		\
-		http_request_manager.ml	\
-		freebase_http.ml	\
-		youtube_http.ml
+ML :=		readability_http.ml
 
-ML_EXEC :=	$(ML)			\
-		bot.ml
+MLI :=		readability_http.mli
 
-MLI :=		youtube_http.mli	\
-		freebase_http.mli
+PACKAGES :=	cohttp,cohttp.lwt,rdf,yojson
 
-
-PACKAGES :=	lwt,cohttp,cohttp.lwt,yojson,str
-
-CMX :=		$(ML_EXEC:.ml=.cmx)
+CMX :=		$(ML:.ml=.cmx)
 CMO :=		$(ML:.ml=.cmo)
 CMI :=		$(MLI:.mli=.cmi)
+ALL_CMI :=	$(ML:.ml=.cmi)
 LIB :=		-package $(PACKAGES)
 SYNTAX :=	-syntax camlp4o -package lwt.syntax
 DOC_DIR :=	doc/html/
@@ -40,7 +32,7 @@ lib:		.depend $(CMI) $(CMO)
 		$(OCAMLC) -a $(CMO) -o $(NAME).cma
 
 install:	$(CMI) $(CMX) $(CMO) lib
-		$(OCAMLFIND) install $(NAME) META $(NAME).cma $(CMI) $(CMX) $(CMO)
+		$(OCAMLFIND) install $(NAME) META $(NAME).cma $(ALL_CMI) $(CMX) $(CMO)
 
 uninstall:
 		$(OCAMLFIND) remove $(NAME)
@@ -67,7 +59,6 @@ clean:
 		@$(RM) $(NAME) $(NAME).cma
 
 .depend:
-		@$(RM) .depend
 		$(OCAMLDEP) $(MLI) $(ML) > .depend
 
 .PHONY:		doc

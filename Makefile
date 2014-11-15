@@ -2,7 +2,8 @@ DIRECTORIES :=	pumgrana_tools		\
 		pumgrana_client_tools	\
 		pumgrana_http		\
 		pumgrana_client_http	\
-		readability		\
+		readability_http	\
+		opencalais_http		\
 		freebase_youtube	\
 		dbpedia			\
 		tidy

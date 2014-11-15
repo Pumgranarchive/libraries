@@ -1,10 +1,10 @@
-NAME :=		bfy
+NAME :=		opencalais_http
 
-ML :=		request.ml
+ML :=		opencalais.ml
 
-ML_EXEC :=	$(ML)			
+ML_EXEC :=	$(ML)
 
-MLI :=		
+MLI :=
 
 PACKAGES :=	lwt,cohttp,cohttp.lwt,yojson,str
 

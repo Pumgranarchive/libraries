@@ -1,6 +1,7 @@
 let pumgrana_api_uri = ref "http://127.0.0.1:8081/api/"
 
 let content_uri = "content/"
+let uri_from_platform = content_uri ^ "from_platform/"
 let content_detail_uri = content_uri ^ "detail/"
 let contents_uri = content_uri ^ "list_content/"
 let research_contents_uri = content_uri ^ "research/"

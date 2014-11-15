@@ -1,0 +1,5 @@
+name="readability_http"
+description="Readability http ocaml binding"
+version="0.1"
+depends="cohttp,cohttp.lwt,rdf,yojson"
+archive(byte)="readability_http.cma"

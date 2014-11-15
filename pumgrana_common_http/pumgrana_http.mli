@@ -13,6 +13,8 @@ val set_pumgrana_api_uri : uri -> unit
 
 (** {6 Contents}  *)
 
+val uri_from_platform : string -> string -> uri Lwt.t
+
 val get_content_detail : uri ->
   (uri * string * string * string * bool) Lwt.t
 
