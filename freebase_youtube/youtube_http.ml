@@ -13,7 +13,7 @@ exception Youtube of string
 ** Types
 *)
 (* private *)
-type video_id = string
+type video_id = (string * string) (* url, id *)
 
 (* public *)
 type title = string
@@ -54,8 +54,9 @@ let create_search_url ?query ?topic_id parts fields max_results type_of_result =
   ^ "&key=" ^ g_youtube_api_key
 
 let create_video_url video_ids parts fields =
+  let ids = List.map snd video_ids in
   g_api_base_url
-  ^ "videos?id=" ^ (Bfy_helpers.strings_of_list video_ids ",")
+  ^ "videos?id=" ^ (Bfy_helpers.strings_of_list ids ",")
   ^ "&part=" ^ parts
   ^ "&fields=" ^ fields
   ^ "&key=" ^ g_youtube_api_key
@@ -185,12 +186,12 @@ let get_video_id_from_url url =
   in
   if (is_url_from_youtube url) = false
   then raise (BadYoutubeUrl "Youtube url pattern not recognized.")
-  else extract_id_from_url url
+  else (url, extract_id_from_url url)
 
 
 (*** Printing ***)
 (** Print a video on stdout *)
-let print_youtube_video (id, title, url, description, categories) =
+let print_youtube_video ((_, id), title, url, description, categories) =
   let string_of_categories (topic_ids, relevant_topic_ids) =
     let rec aux = function
       | h::t    -> "\n    -" ^ h ^ (aux t)
@@ -220,10 +221,14 @@ let get_videos_from_ids video_ids =
         "snippet,topicDetails"
         "items(id,snippet(title,description),topicDetails)" in
     lwt youtube_json = Http_request_manager.request
-            ~display_body:false youtube_url_http
-    in
-    Lwt.return (videos_of_json youtube_json)
-  with e -> raise (Youtube (get_exc_string e))
+            ~display_body:false youtube_url_http in
+    let change_video_url (v_id, t, _, s_d, c) =
+      let pair_associated_to_current_video =
+        let predicate (_, id) = (id = v_id)in
+        List.find predicate video_ids in
+      (pair_associated_to_current_video, t, (fst pair_associated_to_current_video), s_d, c) in
+    Lwt.return (List.map change_video_url (videos_of_json youtube_json))
+    with e -> raise (Youtube (get_exc_string e))
 
 (**
 ** get a list of video from a research
@@ -239,7 +244,7 @@ let search_video ?query ?topic_id max_result =
         (string_of_int max_result)
         "video"
     in
-    let get_id_from_video (id, _, _, _, _) = id in
+    let get_id_from_video (id, _, url, _, _) = (id, url) in
     lwt youtube_json = Http_request_manager.request ~display_body:false url in
     let videos = videos_of_json youtube_json in
     let ids = (List.map get_id_from_video videos) in
@@ -251,7 +256,7 @@ let search_video ?query ?topic_id max_result =
 *)
 let get_videos_from_playlist_id playlist_id max_result =
   try_lwt
-    let get_id item = get_videoId_field (get_contentDetails_field item) in
+    let get_id item = get_video_id_from_url (g_video_base_url ^ (get_videoId_field (get_contentDetails_field item))) (* ("", get_videoId_field (get_contentDetails_field item)) *) in
     let rec aux playlist_id ?(page_token = None) max_result =
       let (max_result, next_max_result) =
         if max_result > 50 then (50, max_result - 50) else (max_result, 0) in
