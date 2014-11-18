@@ -1,6 +1,6 @@
 NAME :=		opencalais_http
 
-ML :=		opencalais.ml
+ML :=		opencalais_http.ml
 
 ML_EXEC :=	$(ML)
 
