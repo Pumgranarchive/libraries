@@ -24,6 +24,7 @@ let research_link_content_uri = link_uri ^ "list_from_research/"
 let link_content_uri = link_uri ^ "list_from_content/"
 let link_content_tags_uri = link_uri ^ "list_from_content_tags/"
 let link_insert_uri = link_uri ^ "insert"
+let link_scored_insert_uri = link_uri ^ "scored_insert"
 let link_update_uri = link_uri ^ "update"
 let link_delete_uri = link_uri ^ "delete"
 

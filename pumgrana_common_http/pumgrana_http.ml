@@ -213,6 +213,26 @@ let insert_links links =
   let links_list = List.split_to Ph_conf.max_request_list_size links in
   Lwt_list.fold_left wrapper [] links_list
 
+let insert_scored_links links =
+  let aux links () =
+    let json_of_links (origin_uri, target_uri, tags_uri, score) =
+      `Assoc [("origin_uri", Json.of_uri origin_uri);
+              ("target_uri", Json.of_uri target_uri);
+              ("tags_uri", Json.of_uris tags_uri);
+              ("score", Json.of_int score)]
+    in
+    let json = `List (List.map json_of_links links) in
+    let json = `Assoc [("data", json)] in
+    lwt json = Http.post Ph_conf.link_scored_insert_uri json in
+    Lwt.return (Pdeserialize.get_links_uri_return json)
+  in
+  let wrapper ret links =
+    lwt tmp = Exc.wrapper (aux links) in
+    Lwt.return (ret@tmp)
+  in
+  let links_list = List.split_to Ph_conf.max_request_list_size links in
+  Lwt_list.fold_left wrapper [] links_list
+
 let update_links links =
   let aux links () =
     let json_of_links (link_uri, tags_uri) =
