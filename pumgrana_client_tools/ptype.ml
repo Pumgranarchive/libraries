@@ -14,16 +14,13 @@ let search_forward ~start str1 str2 start_pos =
   let end1 = String.length str1 in
   let end2 = String.length str2 in
   let rec aux pos1 pos2 =
-    if pos1 == end1 then pos2
-    else if pos2 < end2 then
+    if pos1 >= end1 then pos2
+    else if pos2 >= end2 then raise Not_found else
       let c1 = String.get str1 pos1 in
       let c2 = String.get str2 pos2 in
-      if Char.compare c1 c2 == 0
-      then aux (pos1 + 1) (pos2 + 1)
-      else if start
-      then raise Not_found
+      if Char.compare c1 c2 == 0 then aux (pos1 + 1) (pos2 + 1)
+      else if start then raise Not_found
       else aux 0 (pos2 + 1)
-    else raise Not_found
   in
   aux 0 start_pos
 
