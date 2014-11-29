@@ -6,6 +6,8 @@
 ** PRIVATE
 *)
 
+open Yojson.Basic
+
 (* CONFIG *)
 
 let opencalais_uri = Uri.of_string "http://api.opencalais.com/tag/rs/enrich"
@@ -22,7 +24,7 @@ let get_results_from_request (header, body) =
 
 let get_json_from_results display_body results  =
   if display_body then print_endline results;
-  Yojson.Basic.from_string results
+  from_string results
 
 let base_headers length =
   let headers = Cohttp.Header.init_with "accept" "application/json" in
@@ -43,8 +45,35 @@ let request ?(display_body=false) body_str =
 
 (* TEST *)
 
-(* let _ = set_token "z3k9bmug6udbqcqdwgt8qzq2" *)
+let _ = set_token "z3k9bmug6udbqcqdwgt8qzq2"
 
-(* let body = "The Hobbit, or There and Back Again, is a fantasy novel and children's book by English author J. R. R. Tolkien. It was published on 21 September 1937 to wide critical acclaim, being nominated for the Carnegie Medal and awarded a prize from the New York Herald Tribune for best juvenile fiction. The book remains popular and is recognized as a classic in children's literature." *)
+let body = "The Hobbit, or There and Back Again, is a fantasy novel and children's book by English author J. R. R. Tolkien. It was published on 21 September 1937 to wide critical acclaim, being nominated for the Carnegie Medal and awarded a prize from the New York Herald Tribune for best juvenile fiction. The book remains popular and is recognized as a classic in children's literature."
 
-(* lwt json_result = request ~display_body:true body *)
+lwt json_result = request ~display_body:false body
+
+let display_json json_tags = pretty_to_string json_tags
+
+let get_json_list json_tags = Util.to_list json_tags
+
+let list_displayer list_json =
+  let displayer (name, json) =
+    Printf.printf "%s - %s\n===\n" name (pretty_to_string json) in
+  List.iter displayer list_json
+
+let tags_from_results json_tags =
+  let open Yojson.Basic.Util in
+  let get_tags l json =
+    if (to_string (member "_typeGroup" json)) == "socialTag"
+    then (to_string (member "name" json))::l
+    else l
+    in
+  List.fold_left get_tags [] json_tags
+
+let parse_json result json_tags = json_tags::result
+
+(* let tags_from_results json_tags = *)
+(*   Util.to_list json_tags; *)
+(*   List.fold_left parse_json [] json_tags *)
+
+let _ = list_displayer (Util.to_assoc json_result);
+(* let _ = print_endline (display_json json_result); *)
