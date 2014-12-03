@@ -57,13 +57,13 @@ let get_json_list json_tags = Util.to_list json_tags
 
 let list_displayer list_json =
   let displayer (name, json) =
-    Printf.printf "%s - %s\n===\n" name (pretty_to_string json) in
+    Printf.printf "%s - %s\n===\n" name (pretty_to_string (Yojson.Basic.Util.member "_typeGroup" json)) in
   List.iter displayer list_json
 
 let tags_from_results json_tags =
   let open Yojson.Basic.Util in
-  let get_tags l json =
-    if (to_string (member "_typeGroup" json)) == "socialTag"
+  let get_tags l (name, json) =
+    if (member "_typeGroup" json) != `Null && (to_string (member "_typeGroup" json)) == "socialTag"
     then (to_string (member "name" json))::l
     else l
     in
@@ -75,9 +75,9 @@ let parse_json result json_tags = json_tags::result
 (*   Util.to_list json_tags; *)
 (*   List.fold_left parse_json [] json_tags *)
 
-let printer l = List.iter (Printf.printf "%s ") l
+let printer l = List.iter (Printf.printf "%s\n") l
 
-(* let _ = list_displayer (Yojson.Basic.Util.to_assoc json_result); *)
+let __ = list_displayer (Yojson.Basic.Util.to_assoc json_result)
 
 let _ = printer (tags_from_results (Yojson.Basic.Util.to_assoc json_result))
 
