@@ -4,7 +4,7 @@ ML :=		opencalais_http.ml
 
 ML_EXEC :=	$(ML)
 
-MLI :=
+MLI :=		opencalais_http.mli
 
 PACKAGES :=	lwt,cohttp,cohttp.lwt,yojson,str
 

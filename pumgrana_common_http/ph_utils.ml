@@ -108,6 +108,8 @@ struct
   let of_link_ids ids = `List (List.map of_link_id ids)
   let of_string str = `String str
   let of_strings strs = `List (List.map of_string strs)
+  let of_int dec = `Int dec
+  let of_ints decs = `List (List.map of_int decs)
 
   let add name f p list = Common.bind (fun x -> (name, f x)::list) list p
 

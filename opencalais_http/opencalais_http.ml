@@ -6,6 +6,8 @@
 ** PRIVATE
 *)
 
+open Yojson.Basic
+
 (* CONFIG *)
 
 let opencalais_uri = Uri.of_string "http://api.opencalais.com/tag/rs/enrich"
@@ -22,7 +24,7 @@ let get_results_from_request (header, body) =
 
 let get_json_from_results display_body results  =
   if display_body then print_endline results;
-  Yojson.Basic.from_string results
+  from_string results
 
 let base_headers length =
   let headers = Cohttp.Header.init_with "accept" "application/json" in
@@ -49,32 +51,34 @@ let body = "The Hobbit, or There and Back Again, is a fantasy novel and children
 
 lwt json_result = request ~display_body:false body
 
-let display_json json_tags = Yojson.Basic.pretty_to_string json_tags
+let display_json json_tags = pretty_to_string json_tags
 
-let get_json_list json_tags = Yojson.Basic.Util.to_list json_tags
+let get_json_list json_tags = Util.to_list json_tags
 
-let list_displayer list_json = 
-  let displayer (name, json) = Printf.printf "%s - %s\n===\n" name (Yojson.Basic.pretty_to_string json) in 
+let list_displayer list_json =
+  let displayer (name, json) =
+    Printf.printf "%s - %s\n===\n" name (pretty_to_string json) in
   List.iter displayer list_json
 
-let tags_from_results json_tags = 
-  let get_str_f_json json = Yojson.Basic.Util.to_string json in
-  let get_tags l (name, json) = 
-    if (get_str_f_json (Yojson.Basic.Util.member "_typeGroup" json)) == "socialTag"
-    then (get_str_f_json (Yojson.Basic.Util.member "name" json))::l
+let tags_from_results json_tags =
+  let open Yojson.Basic.Util in
+  let get_tags l json =
+    if (to_string (member "_typeGroup" json)) == "socialTag"
+    then (to_string (member "name" json))::l
     else l
     in
-  List.fold_left get_tags [] (json_tags)
+  List.fold_left get_tags [] json_tags
 
-(* let parse_json result json_tags = result::[json_tags]
+let parse_json result json_tags = json_tags::result
 
-let tags_from_results json_tags = Yojson.Basic.Util.to_list json_tags
-  List.fold_left parse_json [] json_tags *)
+(* let tags_from_results json_tags = *)
+(*   Util.to_list json_tags; *)
+(*   List.fold_left parse_json [] json_tags *)
 
 let printer l = List.iter (Printf.printf "%s ") l
 
 (* let _ = list_displayer (Yojson.Basic.Util.to_assoc json_result); *)
 
 let _ = printer (tags_from_results (Yojson.Basic.Util.to_assoc json_result))
- 
+
 (* let _ = print_endline (display_json json_result); *)
