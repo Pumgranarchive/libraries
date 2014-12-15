@@ -54,7 +54,7 @@ let tags_from_results json_tags =
 
 (* TEST *)
 
-let _ = set_token "z3k9bmug6udbqcqdwgt8qzq2"
+(* let _ = set_token "z3k9bmug6udbqcqdwgt8qzq2" *)
 
 (*
 let body = "The Hobbit, or There and Back Again, is a fantasy novel and children's book by English author J. R. R. Tolkien. It was published on 21 September 1937 to wide critical acclaim, being nominated for the Carnegie Medal and awarded a prize from the New York Herald Tribune for best juvenile fiction. The book remains popular and is recognized as a classic in children's literature."
@@ -64,4 +64,4 @@ lwt json_result = request ~display_body:false body
 let _ =
   let printer l = List.iter (Printf.printf "-%s\n") l in
   printer (tags_from_results json_result)
- *)
+*)
