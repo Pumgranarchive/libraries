@@ -165,7 +165,8 @@ let videos_of_json json =
     in
     (id, get_title_field snippet, url, description, categories)
   in
-  List.map create_video (get_items_field json)
+  let items = get_items_field json in
+  List.map create_video items
 
 (*
 ** PUBLIC
@@ -212,6 +213,7 @@ let print_youtube_video ((_, id), title, url, description, categories) =
 
 (**
 ** return a list of video from a list of id
+   WARNING: MAY NOT WORK
 *)
 let get_videos_from_ids video_ids =
   try_lwt
@@ -244,11 +246,18 @@ let search_video ?query ?topic_id max_result =
         (string_of_int max_result)
         "video"
     in
-    let get_id_from_video (id, _, url, _, _) = (id, url) in
+    let format_id (id, title, url, summary, categories) =
+      ((url, id), title, url, summary, categories)
+    in
     lwt youtube_json = Http_request_manager.request ~display_body:false url in
     let videos = videos_of_json youtube_json in
-    let ids = (List.map get_id_from_video videos) in
-    get_videos_from_ids ids
+    let videos' = List.map format_id videos in
+    Lwt.return videos'
+    (* let get_id_from_video (id, _, url, _, _) = (id, url) in *)
+    (* Printf.printf "2 %d\n" (List.length videos); *)
+    (* let ids = (List.map get_id_from_video videos) in *)
+    (* Printf.printf "3 %d\n" (List.length ids); *)
+    (* get_videos_from_ids ids *)
   with e -> raise (Youtube (get_exc_string e))
 
 (**
