@@ -1,7 +1,7 @@
 {1 Readability ocaml binding documentation}
 
 {!modules:
-        Readability
+        Readability_http
 }
 
 {2 Index}
