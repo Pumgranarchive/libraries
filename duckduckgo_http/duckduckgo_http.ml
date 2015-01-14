@@ -32,9 +32,10 @@ let request ?(display_body = false) uri_string =
 
 let tags_from_results json_tags =
   let open Yojson.Basic.Util in
+  let get_url str = Str.string_after (List.hd (Str.split (Str.regexp "\">.*</a>") str)) 9 in
   let get_tags l (json) =
     if (member "Topics" json) == `Null && (member "Result" json) != `Null && (member "Text" json) != `Null
-    then ((to_string (member "Result" json)), (to_string (member "Text" json)))::l
+    then (get_url (to_string (member "Result" json)), (to_string (member "Text" json)))::l
     else l
     in
   List.fold_left get_tags [] (to_list (member "RelatedTopics" json_tags))
@@ -45,7 +46,7 @@ lwt result = request ~display_body:false "http://api.duckduckgo.com/?q=apple&for
 
 let result_tab = tags_from_results result
 
-let disp (a, b) = Printf.printf "\tTitre : %s\n\n\tDescription : %s\n----\n" a b
+let disp (a, b) = Printf.printf "\tURL : %s\n\n\tDescription : %s\n----\n" a b
 
 let _ = List.iter (disp) result_tab
 (* let __ = disp result *)
