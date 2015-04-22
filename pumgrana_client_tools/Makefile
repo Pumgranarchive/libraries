@@ -2,8 +2,9 @@ VPATH =		../pumgrana_common_tools
 
 NAME :=		pctools
 
-ML :=		pjson.ml	\
-		ptype.ml	\
+ML :=		pjson.ml		\
+		ptype.ml		\
+		ptools.ml		\
 		pdeserialize.ml
 
 MLI :=		$(VPATH)/pjson.mli		\
