@@ -1,5 +1,0 @@
-name="pumgrana_client_http"
-description="Pumgrana Client HTTP API binding"
-version="0.1"
-depends="lwt,cohttp,cohttp.lwt,yojson,pctools"
-archive(byte)="pumgrana_client_http.cma"

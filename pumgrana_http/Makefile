@@ -1,12 +1,10 @@
-VPATH =		../pumgrana_common_http
-
 NAME :=		pumgrana_http
 
-ML :=		$(VPATH)/ph_conf.ml	\
-		$(VPATH)/ph_utils.ml	\
-		$(VPATH)/pumgrana_http.ml
+ML :=		ph_conf.ml	\
+		ph_utils.ml	\
+		pumgrana_http.ml
 
-MLI :=		$(VPATH)/pumgrana_http.mli
+MLI :=		pumgrana_http.mli
 
 
 PACKAGES :=	lwt,cohttp,cohttp.lwt,yojson,str,rdf,ptools
@@ -30,13 +28,13 @@ all:		$(NAME) lib
 re:		clean all
 
 $(NAME):	$(CMI) $(CMO)
-		$(OCAMLC) -linkpkg $(patsubst $(VPATH)/%,%,$(CMO)) -o $@
+		$(OCAMLC) -linkpkg $(CMO) -o $@
 
 lib:		$(CMI) $(CMO)
-		$(OCAMLC) -a $(patsubst $(VPATH)/%,%,$(CMO)) -o $(NAME).cma
+		$(OCAMLC) -a $(CMO) -o $(NAME).cma
 
 install:	lib $(CMI) $(CMX) $(CMO)
-		$(OCAMLFIND) install $(NAME) META $(NAME).cma $(patsubst $(VPATH)/%,%,$(CMI)) $(patsubst $(VPATH)/%,%,$(CMX)) $(patsubst $(VPATH)/%,%,$(CMO))
+		$(OCAMLFIND) install $(NAME) META $(NAME).cma $(CMI) $(CMX) $(CMO)
 
 uninstall:
 		$(OCAMLFIND) remove $(NAME)
@@ -50,21 +48,21 @@ doc:
 .SUFFIXES:	.ml .mli .cmo .cmi .cmx
 
 %.cmx:		%.ml
-		$(OCAMLOPT) -c $< -o $(patsubst $(VPATH)/%,%,$@)
+		$(OCAMLOPT) -c $< -o $@
 
 %.cmo:		%.ml
-		$(OCAMLC) -c $< -o $(patsubst $(VPATH)/%,%,$@)
+		$(OCAMLC) -c $< -o $@
 
 %.cmi:		%.mli
-		$(OCAMLC) -c $< -o $(patsubst $(VPATH)/%,%,$@)
+		$(OCAMLC) -c $< -o $@
 
 clean:
 		@$(RM) *.cm[iox] *.o
 		@$(RM) $(NAME) $(NAME).cma
 
-# .depend:
-# 		$(OCAMLDEP) $(MLI) $(ML) > .depend
+.depend:
+		$(OCAMLDEP) $(MLI) $(ML) > .depend
 
 .PHONY:		doc
 
-# include .depend
+include .depend

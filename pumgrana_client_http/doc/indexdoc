@@ -1,9 +1,0 @@
-{1 Pumgrana's API ocaml binding documentation}
-
-{!modules:
-        Pumgrana
-}
-
-{2 Index}
-
-{!indexlist}
