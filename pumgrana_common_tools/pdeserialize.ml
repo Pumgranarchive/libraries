@@ -80,10 +80,8 @@ let get_content json_content =
     let title = member "title" json_content in
     let summary = member "summary" json_content in
     let body = member "body" json_content in
-    let v_external = member "external" json_content in
     Ptype.uri_of_string (to_string uri),
-    to_string title, to_string summary, to_string body,
-    to_bool v_external
+    to_string title, to_string summary, to_string body
   with e -> manage_bad_format "Bad content format" e json_content
 
 let get_short_content json_content =
@@ -95,43 +93,46 @@ let get_short_content json_content =
     to_string title, to_string summary
   with e -> manage_bad_format "Bad short content format" e json_content
 
-let get_link json_link =
+let get_linkedcontent json_link =
   try
-    let link_id = member "link_uri" json_link in
+    let link_id = member "link_id" json_link in
     let content_uri = member "content_uri" json_link in
     let content_title = member "content_title" json_link in
     let content_summary = member "content_summary" json_link in
-    Ptype.link_id_of_string (to_string link_id),
+    let nature = member "nature" json_link in
+    to_int link_id,
     Ptype.uri_of_string (to_string content_uri),
-    to_string content_title, to_string content_summary
+    to_string content_title,
+    to_string content_summary,
+    to_string nature
   with e -> manage_bad_format "Bad link format" e json_link
 
-let get_tags_uri_return json_tag =
+let get_tags_id_return json_tag =
   try
-    let uris = to_list (member "tags_uri" json_tag) in
-    List.map (fun x -> Ptype.uri_of_string (to_string (member "uri" x))) uris
+    let uris = to_list (member "tags_id" json_tag) in
+    List.map (fun x -> to_int (member "id" x)) uris
   with e -> manage_bad_format "Bad tags_uri format" e json_tag
 
 let get_tag json_tag =
   try
-    let uri = to_string (member "uri" json_tag) in
+    let uri = to_string (member "id" json_tag) in
     let subject = to_string (member "subject" json_tag) in
     Ptype.uri_of_string uri, subject
   with e -> manage_bad_format "Bad tag format" e json_tag
 
-let get_links_uri_return json_tag =
+let get_link_id_return json_tag =
   try
-    let uris = to_list (member "links_uri" json_tag) in
-    List.map (fun x -> Ptype.link_id_of_string (to_string (member "uri" x))) uris
+    let uris = to_list (member "links_id" json_tag) in
+    List.map (fun x -> to_int (member "id" x)) uris
   with e -> manage_bad_format "Bad links_uri format" e json_tag
 
-let get_link_detail json_detail =
+let get_linkedcontent_detail json_detail =
   try
-    let link_id = to_string (member "link_uri" json_detail) in
+    let link_id = to_int (member "link_id" json_detail) in
     let origin_uri = to_string (member "origin_uri" json_detail) in
     let target_uri = to_string (member "target_uri" json_detail) in
     let tags = to_list (member "tags" json_detail) in
-    Ptype.link_id_of_string link_id,
+    link_id,
     Ptype.uri_of_string origin_uri,
     Ptype.uri_of_string target_uri,
     List.map get_tag tags
@@ -146,8 +147,8 @@ let get_content_list tl =
 let get_short_content_list tl =
   List.map get_short_content (to_list tl)
 
-let get_link_list tl =
-  List.map get_link (to_list tl)
+let get_linkedcontent_list tl =
+  List.map get_linkedcontent (to_list tl)
 
-let get_detail_link_list tl =
-  List.map get_link_detail (to_list tl)
+let get_detail_linkedcontent_list tl =
+  List.map get_linkedcontent_detail (to_list tl)
