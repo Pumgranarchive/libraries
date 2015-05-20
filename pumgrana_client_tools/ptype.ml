@@ -2,9 +2,6 @@ exception Invalid_uri of string
 exception Invalid_link_id of string
 
 type uri = string
-type link_id = uri * uri
-type filter = Most_recent | Most_used | Most_view
-type type_name = Link | Content
 
 (******************************************************************************
 ********************************** Tools **************************************
@@ -83,36 +80,3 @@ let uri_of_string str =
   str
 
 let string_of_uri uri = uri
-
-let string_of_link_id (origin_uri, target_uri) =
-  (string_of_uri origin_uri) ^ "@" ^ (string_of_uri target_uri)
-
-let link_id_of_string link_id =
-  try
-    let strings = split "@" link_id in
-    if List.length strings > 2 then raise (Invalid_argument "Too many @");
-    let origin_str_uri = List.nth strings 0 in
-    let target_str_uri = List.nth strings 1 in
-    let origin_uri = uri_of_string origin_str_uri in
-    let target_uri = uri_of_string target_str_uri in
-    origin_uri, target_uri
-  with e ->
-    raise (Invalid_link_id (link_id ^ ": is not a valid link_id : " ^ (Printexc.to_string e)))
-
-let pumgrana_id_of_uri base uri =
-  let str = string_of_uri uri in
-  let pos =
-    try search_forward ~start:true base str 0
-    with Not_found -> raise (Invalid_uri (str ^ ": is not a Pumgrana URI."))
-  in
-  let _ =
-    try
-      let _ = search_forward ~start:false base str pos in
-      raise (Invalid_uri (str ^ ": looks to be an invalid URI."))
-    with Not_found -> ()
-  in
-  String.sub str pos ((String.length str) - pos)
-
-let link_id origin_uri target_uri = origin_uri, target_uri
-
-let tuple_of_link_id link_id = link_id
