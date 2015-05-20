@@ -11,15 +11,6 @@ exception Pumgrana of string
 module Common =
 struct
 
-  let string_of_filter = function
-    | Most_recent -> "MOST_RECENT"
-    | Most_used   -> "MOST_USED"
-    | Most_view   -> "MOST_VIEW"
-
-  let string_of_type_name = function
-    | Content     -> "CONTENT"
-    | Link        -> "LINK"
-
   let append str p =
     if String.length str == 0
     then (uri_encode p)
@@ -104,8 +95,6 @@ struct
 
   let of_uri uri = `String (string_of_uri uri)
   let of_uris uris = `List (List.map of_uri uris)
-  let of_link_id id = `String (string_of_link_id id)
-  let of_link_ids ids = `List (List.map of_link_id ids)
   let of_string str = `String str
   let of_strings strs = `List (List.map of_string strs)
   let of_int dec = `Int dec

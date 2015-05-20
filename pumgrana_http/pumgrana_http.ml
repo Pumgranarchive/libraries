@@ -14,15 +14,7 @@ let set_pumgrana_api_uri uri =
 ********************************* Content *************************************
 *******************************************************************************)
 
-let uri_from_platform platform_name content_name =
-  let aux () =
-    let parameter = platform_name ^ "/" ^ (Ptype.uri_encode content_name) in
-    lwt json = Http.get Ph_conf.uri_from_platform parameter in
-    Lwt.return (Pdeserialize.get_content_uri_return json)
-  in
-  Exc.wrapper aux
-
-let get_content_detail content_uri =
+let content_detail content_uri =
   let aux () =
     let parameter = Ptype.uri_encode (Ptype.string_of_uri content_uri) in
     lwt json = Http.get Ph_conf.content_detail_uri parameter in
@@ -30,61 +22,30 @@ let get_content_detail content_uri =
   in
   Exc.wrapper aux
 
-let get_contents ?filter ?tags_uri () =
+let contents () =
   let aux () =
-    let str_filter = Common.map Common.string_of_filter filter in
-    let str_tags_uri = Common.map (List.map Ptype.string_of_uri) tags_uri in
-    let parameters = Common.(add_p_list str_tags_uri
-                               (add_p str_filter "")) ^ "/"
-    in
+    let parameters = "" in
     lwt json = Http.get Ph_conf.contents_uri parameters in
     Lwt.return (Pdeserialize.(get_service_return get_short_content_list json))
   in
   Exc.wrapper aux
 
-let research_contents ?filter research =
+let search_contents search =
   let aux () =
-    let str_filter = Common.map Common.string_of_filter filter in
-    let parameters = Common.(add_p str_filter "") ^ "/" ^ research in
-    lwt json = Http.get Ph_conf.research_contents_uri parameters in
+    let parameters = search in
+    lwt json = Http.get Ph_conf.search_contents_uri parameters in
     Lwt.return (Pdeserialize.(get_service_return get_short_content_list json))
   in
   Exc.wrapper aux
 
-let insert_content title summary body ?tags_uri () =
+let insert_content title summary tags_subject () =
   let aux () =
-    let json = `Assoc (Json.add "tags_uri" Json.of_uris tags_uri
-                         [("title", `String title);
-                          ("summary", `String summary);
-                          ("body", `String body)])
+    let json = `Assoc ([("title", `String title);
+                        ("summary", `String summary);
+                        ("tags_subject", Json.of_strings tags_subject)])
     in
     lwt json = Http.post Ph_conf.content_insert_uri json in
     Lwt.return (Pdeserialize.get_content_uri_return json)
-  in
-  Exc.wrapper aux
-
-let update_content uri ?title ?summary ?body ?tags_uri () =
-  let aux () =
-    let json =
-      `Assoc (Json.add "tags_uri" Json.of_uris tags_uri
-                (Json.add "body" Json.of_string body
-                   (Json.add "summary" Json.of_string summary
-                      (Json.add "title" Json.of_string title
-                         ["content_uri", Json.of_uri uri]))))
-    in
-    lwt _ = Http.post Ph_conf.content_update_uri json in
-    Lwt.return ()
-  in
-  Exc.wrapper aux
-
-let update_content_tags uri tags_uri =
-  let aux () =
-    let json =
-      `Assoc [("tags_uri", Json.of_uris tags_uri);
-              ("content_uri", Json.of_uri uri)]
-    in
-    lwt _ = Http.post Ph_conf.content_update_tags_uri json in
-    Lwt.return ()
   in
   Exc.wrapper aux
 
@@ -100,17 +61,9 @@ let delete_contents uris =
 *********************************** Tag ***************************************
 *******************************************************************************)
 
-let tags_by_type type_name =
+let tags_search search =
   let aux () =
-    let parameter = Common.string_of_type_name type_name in
-    lwt json = Http.get Ph_conf.tag_type_uri parameter in
-    Lwt.return (Pdeserialize.(get_service_return get_tag_list json))
-  in
-  Exc.wrapper aux
-
-let tags_from_research research =
-  let aux () =
-    lwt json = Http.get Ph_conf.research_tag_content_uri research in
+    lwt json = Http.get Ph_conf.search_tag_content_uri search in
     Lwt.return (Pdeserialize.(get_service_return get_tag_list json))
   in
   Exc.wrapper aux
@@ -123,65 +76,37 @@ let tags_from_content content_uri =
   in
   Exc.wrapper aux
 
-let tags_from_content_links content_uri =
-  let aux () =
-    let parameter = Ptype.uri_encode (Ptype.string_of_uri content_uri) in
-    lwt json = Http.get Ph_conf.tag_content_links_uri parameter in
-    Lwt.return (Pdeserialize.(get_service_return get_tag_list json))
-  in
-  Exc.wrapper aux
-
-let insert_tags type_name ?uri tags_subject =
-  let aux () =
-    let json = `Assoc (Json.add "uri" Json.of_uri uri
-                         [("type_name",
-                           `String (Common.string_of_type_name type_name));
-                          ("tags_subject", (Json.of_strings tags_subject))])
-    in
-    lwt json = Http.post Ph_conf.tag_insert_uri json in
-    Lwt.return (Pdeserialize.get_tags_uri_return json)
-  in
-  Exc.wrapper aux
-
-let delete_tags tags_uri =
-  let aux () =
-    let json = `Assoc [("tags_uri", Json.of_uris tags_uri)] in
-    lwt _ = Http.post Ph_conf.tag_delete_uri json in
-    Lwt.return ()
-  in
-  Exc.wrapper aux
-
 (******************************************************************************
-*********************************** Link **************************************
+******************************* LinkedContent *********************************
 *******************************************************************************)
 
-let get_link_detail link_id =
+let linkedcontent_detail linkedcontent_id =
   let aux () =
-    let parameter = Ptype.string_of_link_id link_id in
-    lwt json = Http.get Ph_conf.link_detail_uri parameter in
-    let ret = Pdeserialize.(get_service_return get_detail_link_list json) in
+    let parameter = string_of_int linkedcontent_id in
+    lwt json = Http.get Ph_conf.linkedcontent_detail_uri parameter in
+    let ret = Pdeserialize.(get_service_return get_detail_linkedcontent_list json) in
     Lwt.return (List.hd ret)
   in
   Exc.wrapper aux
 
-let links_from_research content_uri research =
+let linkedcontent_search content_uri search =
   let aux () =
     let encoded_uri = Ptype.uri_encode (Ptype.string_of_uri content_uri) in
-    let parameter = encoded_uri ^ "/" ^ research in
-    lwt json = Http.get Ph_conf.research_link_content_uri parameter in
-    Lwt.return (Pdeserialize.(get_service_return get_link_list json))
+    let parameter = encoded_uri ^ "/" ^ search in
+    lwt json = Http.get Ph_conf.search_linkedcontent_content_uri parameter in
+    Lwt.return (Pdeserialize.(get_service_return get_linkedcontent_list json))
   in
   Exc.wrapper aux
 
-let links_from_content content_uri =
+let linkedcontent_from_content content_uri =
   let aux () =
     let parameter = Ptype.uri_encode (Ptype.string_of_uri content_uri) in
-    lwt json = Http.get Ph_conf.link_content_uri parameter in
-    Lwt.return (Pdeserialize.(get_service_return get_link_list json))
+    lwt json = Http.get Ph_conf.linkedcontent_content_uri parameter in
+    Lwt.return (Pdeserialize.(get_service_return get_linkedcontent_list json))
   in
   Exc.wrapper aux
 
-let links_from_content_tags content_uri tags_uri =
+let linkedcontent_from_content_tags content_uri tags_uri =
   let aux () =
     let content_str_uri = Ptype.string_of_uri content_uri in
     let str_tags_uri = List.map Ptype.string_of_uri tags_uri in
@@ -189,22 +114,27 @@ let links_from_content_tags content_uri tags_uri =
       (List.fold_left Common.append
          (Common.append "" content_str_uri) str_tags_uri ) ^ "/"
     in
-    lwt json = Http.get Ph_conf.link_content_tags_uri parameters in
-    Lwt.return (Pdeserialize.(get_service_return get_link_list json))
+    lwt json = Http.get Ph_conf.linkedcontent_content_tags_uri parameters in
+    Lwt.return (Pdeserialize.(get_service_return get_linkedcontent_list json))
   in
   Exc.wrapper aux
 
+(******************************************************************************
+************************************ Link *************************************
+*******************************************************************************)
+
 let insert_links links =
   let aux links () =
-    let json_of_links (origin_uri, target_uri, tags_uri) =
+    let json_of_links (origin_uri, target_uri, nature, mark) =
       `Assoc [("origin_uri", Json.of_uri origin_uri);
               ("target_uri", Json.of_uri target_uri);
-              ("tags_uri", Json.of_uris tags_uri)]
+              ("nature", Json.of_string nature);
+              ("mark", Json.of_int mark)]
     in
     let json = `List (List.map json_of_links links) in
     let json = `Assoc [("data", json)] in
     lwt json = Http.post Ph_conf.link_insert_uri json in
-    Lwt.return (Pdeserialize.get_links_uri_return json)
+    Lwt.return (Pdeserialize.get_link_id_return json)
   in
   let wrapper ret links =
     lwt tmp = Exc.wrapper (aux links) in
@@ -213,43 +143,9 @@ let insert_links links =
   let links_list = List.split_to Ph_conf.max_request_list_size links in
   Lwt_list.fold_left wrapper [] links_list
 
-let insert_scored_links links =
-  let aux links () =
-    let json_of_links (origin_uri, target_uri, tags_uri, score) =
-      `Assoc [("origin_uri", Json.of_uri origin_uri);
-              ("target_uri", Json.of_uri target_uri);
-              ("tags_uri", Json.of_uris tags_uri);
-              ("score", Json.of_int score)]
-    in
-    let json = `List (List.map json_of_links links) in
-    let json = `Assoc [("data", json)] in
-    lwt json = Http.post Ph_conf.link_scored_insert_uri json in
-    Lwt.return (Pdeserialize.get_links_uri_return json)
-  in
-  let wrapper ret links =
-    lwt tmp = Exc.wrapper (aux links) in
-    Lwt.return (ret@tmp)
-  in
-  let links_list = List.split_to Ph_conf.max_request_list_size links in
-  Lwt_list.fold_left wrapper [] links_list
-
-let update_links links =
-  let aux links () =
-    let json_of_links (link_uri, tags_uri) =
-      `Assoc [("link_uri", Json.of_link_id link_uri);
-              ("tags_uri", Json.of_uris tags_uri)]
-    in
-    let json = `Assoc [("data", `List (List.map json_of_links links))] in
-    lwt json = Http.post Ph_conf.link_update_uri json in
-    Lwt.return ()
-  in
-  let wrapper links = Exc.wrapper (aux links) in
-  let links_list = List.split_to Ph_conf.max_request_list_size links in
-  Lwt_list.iter wrapper links_list
-
-let delete_links uris =
+let delete_links ids =
   let aux () =
-    let json = `Assoc [("links_uri", Json.of_link_ids uris)] in
+    let json = `Assoc [("links_id", Json.of_ints ids)] in
     lwt json = Http.post Ph_conf.link_delete_uri json in
     Lwt.return ()
   in
