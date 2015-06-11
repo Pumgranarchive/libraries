@@ -23,8 +23,8 @@ val contents : unit ->
 val search_contents : string ->
   (uri * string * string) list Lwt.t
 
-val insert_content : string -> string ->
-  string list -> unit -> uri Lwt.t
+val insert_content : uri -> string -> string ->
+  string list -> uri Lwt.t
 
 val delete_contents : uri list -> unit Lwt.t
 

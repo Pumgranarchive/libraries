@@ -38,11 +38,12 @@ let search_contents search =
   in
   Exc.wrapper aux
 
-let insert_content title summary tags_subject () =
+let insert_content uri title summary subjects =
   let aux () =
-    let json = `Assoc ([("title", `String title);
+    let json = `Assoc ([("uri", `String (Ptype.string_of_uri uri));
+                        ("title", `String title);
                         ("summary", `String summary);
-                        ("tags_subject", Json.of_strings tags_subject)])
+                        ("subjects", Json.of_strings subjects)])
     in
     lwt json = Http.post Ph_conf.content_insert_uri json in
     Lwt.return (Pdeserialize.get_content_uri_return json)
