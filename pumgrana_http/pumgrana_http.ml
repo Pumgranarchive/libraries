@@ -130,7 +130,7 @@ let insert_links links =
       `Assoc [("origin_uri", Json.of_uri origin_uri);
               ("target_uri", Json.of_uri target_uri);
               ("nature", Json.of_string nature);
-              ("mark", Json.of_int mark)]
+              ("mark", Json.of_float mark)]
     in
     let json = `List (List.map json_of_links links) in
     let json = `Assoc [("data", json)] in

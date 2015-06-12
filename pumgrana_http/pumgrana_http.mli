@@ -53,7 +53,7 @@ val linkedcontent_from_content_tags : uri -> uri list ->
 
 (** {6 Links}  *)
 
-val insert_links : (uri * uri * string * int) list ->
+val insert_links : (uri * uri * string * float) list ->
   int list Lwt.t
 
 val delete_links : int list -> unit Lwt.t
