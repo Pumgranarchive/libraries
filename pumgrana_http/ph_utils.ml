@@ -102,6 +102,10 @@ struct
   let of_float dec = `Float dec
   let of_floats decs = `List (List.map of_float decs)
 
+  let of_tag (subject, mark) = `Assoc ([("subject", of_string subject);
+                                        ("mark", of_float mark)])
+  let of_tags tags = `List (List.map of_tag tags)
+
   let add name f p list = Common.bind (fun x -> (name, f x)::list) list p
 
 end

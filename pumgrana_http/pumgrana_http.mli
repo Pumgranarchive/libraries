@@ -23,8 +23,12 @@ val contents : unit ->
 val search_contents : string ->
   (uri * string * string) list Lwt.t
 
+(**
+   [insert_content uri title summary tags]
+    - [tags] as (subject * mark) list
+*)
 val insert_content : uri -> string -> string ->
-  string list -> uri Lwt.t
+  (string * float) list -> uri Lwt.t
 
 val delete_contents : uri list -> unit Lwt.t
 
