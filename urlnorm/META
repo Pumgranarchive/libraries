@@ -1,0 +1,5 @@
+name="urlnorm"
+description="Normalize an url using urlnrom python lib"
+version="0.1"
+depends="lwt,lwt.unix,str"
+archive(byte)="urlnorm.cma"
