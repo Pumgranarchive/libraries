@@ -24,4 +24,4 @@
    - sort query in the alphabetic order
    - limit the query with 2 parameters
 *)
-val normalize : string -> string
+val normalize : string list -> string list

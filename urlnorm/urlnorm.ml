@@ -1,17 +1,18 @@
 let rec read init channel =
-  try read (init ^ (input_line channel)) channel
-  with End_of_file -> init
+  try read ( (input_line channel) :: init ) channel
+  with End_of_file -> List.rev init
 
 let python ?(imports=[]) cmds =
   let cmd_imports = List.map (fun i -> "import "^ i) imports in
   let oneline = String.concat "; " (cmd_imports @ cmds) in
   let wrap_cmd = "echo \""^ oneline ^"\" | python" in
   let output = Unix.open_process_in wrap_cmd in
-  read "" output
+  read [] output
 
-let urlnorm url =
+let urlnorm urls =
   let imports = ["urlnorm"] in
-  let cmds = ["print(urlnorm.norm('"^ url ^"'))"] in
+  let make_cmd url = "print(urlnorm.norm('"^ url ^"'))" in
+  let cmds = List.map make_cmd urls in
   python ~imports cmds
 
 let substitute_array = [
@@ -59,7 +60,24 @@ let rewrite_query url query =
   let base = String.sub url 0 start in
   rewrite base "?" query
 
-let normalize url =
-  let p_url = urlnorm url in
-  let o_url = replaces p_url substitute_array in
-  rewrite_query o_url (limit_2params (sort_query o_url))
+let internal_normalize durty_url =
+  let url = replaces durty_url substitute_array in
+  rewrite_query url (limit_2params (sort_query url))
+
+let normalize durty_urls =
+  let urls = urlnorm durty_urls in
+  List.map internal_normalize urls
+
+(* let main () = *)
+(*   let durty_urls = [ *)
+(*     "Http://exAMPLE.com./foo"; *)
+(*     "Http://exAMPLE.com./foo//d"; *)
+(*     "Https://exAMPLE.com./foo"; *)
+(*     "Http://exAMPLE.com./foo#test"; *)
+(*     "Http://exAMPLE.com./foo?c=1&d=2&a=1#test" *)
+(*   ] *)
+(*   in *)
+(*   let urls = normalize durty_urls in *)
+(*   List.iter print_endline urls *)
+
+(* let () = main () *)
