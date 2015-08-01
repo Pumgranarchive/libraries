@@ -32,8 +32,9 @@ let log filename subject exc description =
   let title = now ^ " #ERROR on " ^ subject in
   let oc = open_out_gen options right filename in
   output_line oc ("\n" ^ title);
-  output_line oc (Printexc.to_string exc);
-  if (String.length description > 0) then output_line oc description;
+  output_line oc ("Exception: " ^ (Printexc.to_string exc));
+  if (String.length description > 0)
+  then output_line oc ("Description: " ^ description);
   output_line oc "";
   close_out oc;
   title
