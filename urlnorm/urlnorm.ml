@@ -1,13 +1,24 @@
+exception Failed of int
+exception Killed of int
+exception Stopped of int
+
 let rec read init channel =
   try read ( (input_line channel) :: init ) channel
   with End_of_file -> List.rev init
+
+let is_valid = function
+  | Unix.WSIGNALED s -> raise (Killed s)
+  | Unix.WSTOPPED s -> raise (Stopped s)
+  | Unix.WEXITED s -> if s == 0 then () else raise (Failed s)
 
 let python ?(imports=[]) cmds =
   let cmd_imports = List.map (fun i -> "import "^ i) imports in
   let oneline = String.concat "; " (cmd_imports @ cmds) in
   let wrap_cmd = "echo \""^ oneline ^"\" | python" in
-  let output = Unix.open_process_in wrap_cmd in
-  read [] output
+  let cin = Unix.open_process_in wrap_cmd in
+  let output = read [] cin in
+  let status = Unix.close_process_in cin in
+  begin is_valid status; output end
 
 let urlnorm urls =
   let imports = ["urlnorm"] in
