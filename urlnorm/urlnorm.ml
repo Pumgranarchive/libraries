@@ -79,16 +79,56 @@ let normalize durty_urls =
   let urls = urlnorm durty_urls in
   List.map internal_normalize urls
 
-(* let main () = *)
-(*   let durty_urls = [ *)
-(*     "Http://exAMPLE.com./foo"; *)
-(*     "Http://exAMPLE.com./foo//d"; *)
-(*     "Https://exAMPLE.com./foo"; *)
-(*     "Http://exAMPLE.com./foo#test"; *)
-(*     "Http://exAMPLE.com./foo?c=1&d=2&a=1#test" *)
-(*   ] *)
-(*   in *)
-(*   let urls = normalize durty_urls in *)
-(*   List.iter print_endline urls *)
+let print_video_id_from_url url =
+  (* README: Changing "uri_reg" may change the behavior of "extract_id url" because of "Str.group_end n"*)
+  let uri_reg =
+    Str.regexp "\\(https?://\\)?\\(www\\.\\)?youtu\\(\\.be/\\|be\\.com/\\)\\(\\(.+/\\)?\\(watch\\(\\?v=\\|.+&v=\\)\\)?\\(v=\\)?\\)\\([-A-Za-z0-9_]\\)*\\(&.+\\)?" in
+  let is_url_from_youtube url = Str.string_match uri_reg url 0 in
+  let extract_id_from_url url =
+    let _ = Str.string_match uri_reg url 0 in
+    let id_start = Str.group_end 4 and id_end = Str.group_end 9 in
+    String.sub url id_start (id_end - id_start)
+  in
+  if (is_url_from_youtube url) = false
+  then print_endline "Youtube url pattern not recognized."
+  else print_endline (extract_id_from_url url)
 
-(* let () = main () *)
+
+let main () =
+  let durty_urls = [
+    "Http://exAMPLE.com./foo";
+    "Http://exAMPLE.com./foo//d";
+    "Https://exAMPLE.com./foo";
+    "Http://exAMPLE.com./foo#test";
+    "Http://exAMPLE.com./foo?c=1&d=2&a=1#test"
+  ] in
+  let youtube_urls = [
+    "http://www.youtube.com/watch?v=iwGFalTRHDA";
+    "https://www.youtube.com/watch?v=iwGFalTRHDA";
+    "http://www.youtube.com/watch?v=iwGFalTRHDA&feature=related";
+    "http://youtu.be/iwGFalTRHDA";
+    "http://www.youtube.com/embed/watch?feature=player_embedded&v=iwGFalTRHDA";
+    "http://www.youtube.com/embed/watch?v=iwGFalTRHDA";
+    "http://www.youtube.com/embed/v=iwGFalTRHDA";
+    "http://www.youtube.com/watch?feature=player_embedded&v=iwGFalTRHDA";
+    "http://www.youtube.com/watch?v=iwGFalTRHDA";
+    "www.youtube.com/watch?v=iwGFalTRHDA";
+    "www.youtu.be/iwGFalTRHDA";
+    "youtu.be/iwGFalTRHDA";
+    "youtube.com/watch?v=iwGFalTRHDA";
+    "http://www.youtube.com/watch/iwGFalTRHDA";
+    "http://www.youtube.com/v/iwGFalTRHDA"
+    (* "http://www.youtube.com/v/i_GFalTRHDA"; *)
+    (* "http://www.youtube.com/watch?v=i-GFalTRHDA&feature=related"; *)
+    (* "http://www.youtube.com/attribution_link?u=/watch?v=aGmiw_rrNxk&feature=share&a=9QlmP1yvjcllp0h3l0NwuA"; *)
+    (* "http://www.youtube.com/attribution_link?a=fF1CWYwxCQ4&u=/watch?v=qYr8opTPSaQ&feature=em-uploademail"; *)
+    (* "http://www.youtube.com/attribution_link?a=fF1CWYwxCQ4&feature=em-uploademail&u=/watch?v=qYr8opTPSaQ" *)
+  ]
+  in
+  let urls = normalize durty_urls in
+  print_endline "[Youtube Test] If working: every lines will be identical";
+  List.iter print_video_id_from_url youtube_urls;
+  print_endline "[General Test] If working: urls will be well formated";
+  List.iter print_endline urls
+
+let () = main ()
