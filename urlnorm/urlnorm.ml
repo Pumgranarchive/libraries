@@ -79,8 +79,9 @@ let normalize durty_urls =
   let urls = urlnorm durty_urls in
   List.map internal_normalize urls
 
-let print_video_id_from_url url =
+let normalize_youtube_url url =
   (* README: Changing "uri_reg" may change the behavior of "extract_id url" because of "Str.group_end n"*)
+  let youtube_base_url = "http://www.youtube.com/watch/" in
   let uri_reg =
     Str.regexp "\\(https?://\\)?\\(www\\.\\)?youtu\\(\\.be/\\|be\\.com/\\)\\(\\(.+/\\)?\\(watch\\(\\?v=\\|.+&v=\\)\\)?\\(v=\\)?\\)\\([-A-Za-z0-9_]\\)*\\(&.+\\)?" in
   let is_url_from_youtube url = Str.string_match uri_reg url 0 in
@@ -90,9 +91,8 @@ let print_video_id_from_url url =
     String.sub url id_start (id_end - id_start)
   in
   if (is_url_from_youtube url) = false
-  then print_endline "Youtube url pattern not recognized."
-  else print_endline (extract_id_from_url url)
-
+  then raise (Failed 1)
+  else (youtube_base_url ^ (extract_id_from_url url))
 
 let main () =
   let durty_urls = [
@@ -117,17 +117,18 @@ let main () =
     "youtu.be/iwGFalTRHDA";
     "youtube.com/watch?v=iwGFalTRHDA";
     "http://www.youtube.com/watch/iwGFalTRHDA";
-    "http://www.youtube.com/v/iwGFalTRHDA"
-    (* "http://www.youtube.com/v/i_GFalTRHDA"; *)
-    (* "http://www.youtube.com/watch?v=i-GFalTRHDA&feature=related"; *)
-    (* "http://www.youtube.com/attribution_link?u=/watch?v=aGmiw_rrNxk&feature=share&a=9QlmP1yvjcllp0h3l0NwuA"; *)
-    (* "http://www.youtube.com/attribution_link?a=fF1CWYwxCQ4&u=/watch?v=qYr8opTPSaQ&feature=em-uploademail"; *)
-    (* "http://www.youtube.com/attribution_link?a=fF1CWYwxCQ4&feature=em-uploademail&u=/watch?v=qYr8opTPSaQ" *)
+    "http://www.youtube.com/v/iwGFalTRHDA";
+    "http://www.youtube.com/v/i_GFalTRHDA";
+    "http://www.youtube.com/watch?v=i-GFalTRHDA&feature=related";
+    "http://www.youtube.com/attribution_link?u=/watch?v=aGmiw_rrNxk&feature=share&a=9QlmP1yvjcllp0h3l0NwuA";
+    "http://www.youtube.com/attribution_link?a=fF1CWYwxCQ4&u=/watch?v=qYr8opTPSaQ&feature=em-uploademail";
+    "http://www.youtube.com/attribution_link?a=fF1CWYwxCQ4&feature=em-uploademail&u=/watch?v=qYr8opTPSaQ"
   ]
   in
   let urls = normalize durty_urls in
-  print_endline "[Youtube Test] If working: every lines will be identical";
-  List.iter print_video_id_from_url youtube_urls;
+  let youtube_urls = List.map normalize_youtube_url youtube_urls in
+  print_endline "[Youtube Test] If working: url will look like \"http://www.youtube.com/watch/YOUTUBE_ID\"";
+  List.iter print_endline youtube_urls;
   print_endline "[General Test] If working: urls will be well formated";
   List.iter print_endline urls
 
