@@ -21,4 +21,4 @@ let link_uri = "link/"
 let link_insert_uri = link_uri ^ "insert"
 let link_delete_uri = link_uri ^ "delete"
 
-let max_request_list_size = 100
+let max_request_list_size = 20

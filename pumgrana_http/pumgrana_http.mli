@@ -8,7 +8,7 @@ exception Pumgrana of string
 open Ptype
 
 (** Set the pumgrana API uri
-    Default: http://127.0.0.1:8081/api/ *)
+    Default: http://127.0.0.1:8081/ *)
 val set_pumgrana_api_uri : uri -> unit
 
 (** {6 Contents}  *)
