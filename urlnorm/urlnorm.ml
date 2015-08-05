@@ -22,7 +22,7 @@ let python ?(imports=[]) cmds =
 
 let urlnorm urls =
   let imports = ["urlnorm"] in
-  let make_cmd url = "print(urlnorm.norm('"^ url ^"'))" in
+  let make_cmd url = "print(urlnorm.norm('"^ url ^"').encode('utf-8'))" in
   let cmds = List.map make_cmd urls in
   python ~imports cmds
 
@@ -84,11 +84,14 @@ let normalize durty_urls =
 (*     "Http://exAMPLE.com./foo"; *)
 (*     "Http://exAMPLE.com./foo//d"; *)
 (*     "Https://exAMPLE.com./foo"; *)
+(*     "Https://exAMPLE.com./foo/../bar"; *)
 (*     "Http://exAMPLE.com./foo#test"; *)
-(*     "Http://exAMPLE.com./foo?c=1&d=2&a=1#test" *)
+(*     "Http://exAMPLE.com./foo?c=1&d=2&a=1#test"; *)
+(*     "http://en.wikipedia.org/wiki/Astra_19.2%C2%B0E" *)
 (*   ] *)
 (*   in *)
 (*   let urls = normalize durty_urls in *)
+(*   print_endline "\nResults"; *)
 (*   List.iter print_endline urls *)
 
 (* let () = main () *)
