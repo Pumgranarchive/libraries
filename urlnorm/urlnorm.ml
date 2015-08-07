@@ -13,8 +13,10 @@ let is_valid = function
 
 let python ?(imports=[]) cmds =
   let cmd_imports = List.map (fun i -> "import "^ i) imports in
-  let oneline = String.concat "; " (cmd_imports @ cmds) in
+  let encoding = "#coding=utf-8" in
+  let oneline = encoding ^ "\\n" ^ String.concat ";" (cmd_imports @ cmds) ^ ";" in
   let wrap_cmd = "echo \""^ oneline ^"\" | python" in
+  print_endline wrap_cmd;
   let cin = Unix.open_process_in wrap_cmd in
   let output = read [] cin in
   let status = Unix.close_process_in cin in
@@ -22,7 +24,7 @@ let python ?(imports=[]) cmds =
 
 let urlnorm urls =
   let imports = ["urlnorm"] in
-  let make_cmd url = "print(urlnorm.norm('"^ url ^"').encode('utf-8'))" in
+  let make_cmd url = "print(urlnorm.norm(u'"^ url ^"').encode('utf-8'))" in
   let cmds = List.map make_cmd urls in
   python ~imports cmds
 
@@ -87,7 +89,8 @@ let normalize durty_urls =
 (*     "Https://exAMPLE.com./foo/../bar"; *)
 (*     "Http://exAMPLE.com./foo#test"; *)
 (*     "Http://exAMPLE.com./foo?c=1&d=2&a=1#test"; *)
-(*     "http://en.wikipedia.org/wiki/Astra_19.2%C2%B0E" *)
+(*     "http://en.wikipedia.org/wiki/Astra_19.2%C2%B0E"; *)
+(*     "https://en.wikipedia.org/wiki/Astra_19.2°E" *)
 (*   ] *)
 (*   in *)
 (*   let urls = normalize durty_urls in *)
