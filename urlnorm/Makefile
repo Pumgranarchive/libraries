@@ -33,6 +33,7 @@ lib:		.depend $(CMI) $(CMO)
 
 install:	$(CMI) $(CMX) $(CMO) lib
 		$(OCAMLFIND) install $(NAME) META $(NAME).cma $(CMI) $(CMX) $(CMO)
+		./setup.sh
 
 uninstall:
 		$(OCAMLFIND) remove $(NAME)
