@@ -1,5 +1,5 @@
 (**
-   {b Pumgrana -
+   {b Pumgrana http -
    This module bind the Pumgrana API}
 *)
 

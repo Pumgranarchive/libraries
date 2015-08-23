@@ -1,5 +1,5 @@
 (**
-   Pumgrana
+   Pumgrana http
    The Http Pumgrana API Binding
 *)
 
