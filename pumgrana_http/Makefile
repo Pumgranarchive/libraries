@@ -7,7 +7,7 @@ ML :=		ph_conf.ml	\
 MLI :=		pumgrana_http.mli
 
 
-PACKAGES :=	lwt,cohttp,cohttp.lwt,yojson,str,rdf,ptools
+PACKAGES :=	lwt,cohttp,cohttp.lwt,yojson,str,rdf,urlnorm,ptools
 
 CMX :=		$(ML:.ml=.cmx)
 CMO :=		$(ML:.ml=.cmo)

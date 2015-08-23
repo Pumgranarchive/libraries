@@ -1,5 +1,5 @@
 name="pumgrana_http"
 description="Pumgrana HTTP API binding"
 version="0.1"
-depends="lwt,cohttp,cohttp.lwt,rdf,str,yojson,ptools"
+depends="lwt,cohttp,cohttp.lwt,rdf,str,yojson,urlnorm,ptools"
 archive(byte)="pumgrana_http.cma"
