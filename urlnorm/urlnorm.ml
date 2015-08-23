@@ -73,12 +73,12 @@ let rewrite_query url query =
   let base = String.sub url 0 start in
   rewrite base "?" query
 
-let internal_normalize durty_url =
-  let url = replaces durty_url substitute_array in
+let internal_normalize dirty_url =
+  let url = replaces dirty_url substitute_array in
   rewrite_query url (limit_2params (sort_query url))
 
-let normalize durty_urls =
-  let urls = urlnorm durty_urls in
+let normalize dirty_urls =
+  let urls = urlnorm dirty_urls in
   List.map internal_normalize urls
 
 let normalize_youtube_url url =
@@ -97,7 +97,7 @@ let normalize_youtube_url url =
   else (youtube_base_url ^ (extract_id_from_url url))
 
 let main () =
-  let durty_urls = [
+  let dirty_urls = [
     "Http://exAMPLE.com./foo";
     "Http://exAMPLE.com./foo//d";
     "Https://exAMPLE.com./foo";
@@ -130,7 +130,7 @@ let main () =
     "http://www.youtube.com/attribution_link?a=fF1CWYwxCQ4&feature=em-uploademail&u=/watch?v=qYr8opTPSaQ"
   ]
   in
-  let urls = normalize durty_urls in
+  let urls = normalize dirty_urls in
   let youtube_urls = List.map normalize_youtube_url youtube_urls in
   print_endline "[Youtube Test] If working: url will look like \"http://www.youtube.com/watch/YOUTUBE_ID\"";
   List.iter print_endline youtube_urls;
