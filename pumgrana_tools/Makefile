@@ -11,7 +11,7 @@ MLI :=		$(VPATH)/pjson.mli		\
 		$(VPATH)/ptype.mli
 
 
-PACKAGES :=	cohttp,str,yojson
+PACKAGES :=	cohttp,str,yojson,urlnorm
 
 CMX :=		$(ML:.ml=.cmx)
 CMO :=		$(ML:.ml=.cmo)
@@ -32,8 +32,8 @@ all:		$(NAME) lib
 
 re:		clean all
 
-$(NAME):	$(CMI) $(CMX)
-		$(OCAMLOPT) -linkpkg $(CMX) -o $@
+$(NAME):	$(CMI) $(CMO)
+		$(OCAMLC) -linkpkg $(CMO) -o $@
 
 lib:		$(CMI) $(CMO)
 		$(OCAMLC) -a $(CMO) -o $(NAME).cma

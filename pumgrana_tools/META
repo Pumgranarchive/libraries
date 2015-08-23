@@ -1,5 +1,5 @@
 name="ptools"
 description="Pumgrana tools"
 version="0.1"
-depends="rdf,str,yojson"
+depends="rdf,str,yojson,urlnorm"
 archive(byte)="ptools.cma"
