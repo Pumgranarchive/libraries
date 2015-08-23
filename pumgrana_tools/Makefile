@@ -11,7 +11,7 @@ MLI :=		$(VPATH)/pjson.mli		\
 		$(VPATH)/ptype.mli
 
 
-PACKAGES :=	rdf,str,yojson
+PACKAGES :=	cohttp,str,yojson
 
 CMX :=		$(ML:.ml=.cmx)
 CMO :=		$(ML:.ml=.cmo)
