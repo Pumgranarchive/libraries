@@ -14,7 +14,7 @@ MLI :=		dbpedia_record.mli	\
 		rdf_http.mli
 
 
-PACKAGES :=	lwt,cohttp,cohttp.lwt,rdf,rdf.lwt,ptools
+PACKAGES :=	lwt,cohttp,cohttp.lwt,rdf,rdf.lwt,urlnorm,ptools
 
 CMX :=		$(ML_EXEC:.ml=.cmx)
 CMO :=		$(ML:.ml=.cmo)
