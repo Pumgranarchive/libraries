@@ -1,4 +1,5 @@
-DIRECTORIES :=	urlnorm			\
+DIRECTORIES :=	pghttp			\
+		urlnorm			\
 		pumgrana_tools		\
 		pumgrana_client_tools	\
 		pumgrana_http		\
