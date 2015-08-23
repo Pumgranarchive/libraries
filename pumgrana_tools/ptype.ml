@@ -31,21 +31,11 @@ let compare_uri u1 u2 =
   let str_u2 = List.hd (Urlnorm.normalize [string_of_uri u2]) in
   String.compare str_u1 str_u2
 
-let replace remove_list replace_list str =
-  let aux str remove_str replace_str =
-    let regexp = Str.regexp remove_str in
-    Str.global_replace regexp replace_str str
-  in
-  List.fold_left2 aux str remove_list replace_list
+let uri_encode url = Netencoding.Url.encode url
+  (* replace char_list encoded_char url *)
 
-let char_list =    ["/";  ":";  "?";  "=";  "&";  "#";  ";";  " ";  "<";  ">"]
-let encoded_char = ["%2F";"%3A";"%3F";"%3D";"%26";"%23";"%3B";"%20";"%3C";"%3E"]
-
-let uri_encode url =
-  replace char_list encoded_char url
-
-let uri_decode url =
-  replace encoded_char char_list url
+let uri_decode url = Netencoding.Url.decode url
+  (* replace encoded_char char_list url *)
 
 
 (******************************************************************************
@@ -54,6 +44,22 @@ let uri_decode url =
 
 module Test =
 struct
+
+  let encode () =
+    let uri = "https://en.wikipedia.org/wiki/Johnny_Hallyday#" in
+    let should_be = "https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FJohnny_Hallyday%23" in
+    let encoded = uri_encode uri in
+    if (String.compare encoded should_be == 0)
+    then print_endline "[Success]\t encode_uri"
+    else print_endline "[Fail]\t encode_uri"
+
+  let decode () =
+    let encoded = "https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FJohnny_Hallyday%23" in
+    let should_be = "https://en.wikipedia.org/wiki/Johnny_Hallyday#" in
+    let decoded = uri_decode encoded in
+    if (String.compare decoded should_be == 0)
+    then print_endline "[Success]\t decode_uri"
+    else print_endline "[Fail]\t decode_uri"
 
   let compare () =
     let uri_1 = uri_of_string "https://en.wikipedia.org/wiki/Astra_19.2°E" in
@@ -85,7 +91,9 @@ end
 let main () =
   begin
     Test.cast ();
-    Test.compare ()
+    Test.compare ();
+    Test.encode ();
+    Test.decode ()
   end
 
-let () = main ()
+(* let () = main () *)
