@@ -10,7 +10,7 @@ let is_url_from_youtube url =
 
 let normalize_youtube_url url =
   (* README: Changing "uri_reg" may change the behavior of "extract_id url" because of "Str.group_end n"*)
-  let youtube_base_url = "http://www.youtube.com/watch/" in
+  let youtube_base_url = "http://youtube.com/watch/" in
   let extract_id_from_url url =
     let _ = Str.string_match youtube_reg url 0 in
     let id_start = Str.group_end 4 and id_end = Str.group_end 9 in
@@ -94,14 +94,15 @@ let rewrite_query url query =
 
 let internal_normalize dirty_url =
   let url = replaces dirty_url substitute_array in
-  let normalized_url = rewrite_query url (limit_2params (sort_query url)) in
-  if is_url_from_youtube normalized_url
-  then normalize_youtube_url normalized_url
-  else normalized_url
+  rewrite_query url (limit_2params (sort_query url))
+
+let switch_internal_normalize dirty_url =
+  if is_url_from_youtube dirty_url then normalize_youtube_url dirty_url
+  else internal_normalize dirty_url
 
 let normalize dirty_urls =
   let urls = urlnorm dirty_urls in
-  List.map internal_normalize urls
+  List.map switch_internal_normalize urls
 
 
 let main () =
@@ -145,4 +146,4 @@ let main () =
   print_endline "[General Test] If working: urls will be well formated";
   List.iter print_endline urls
 
-let () = main ()
+(* let () = main () *)
