@@ -2,6 +2,26 @@ exception Failed of int
 exception Killed of int
 exception Stopped of int
 
+(*** Youtube Normalize ***)
+let youtube_reg = Str.regexp "\\(https?://\\)?\\(www\\.\\)?youtu\\(\\.be/\\|be\\.com/\\)\\(\\(.+/\\)?\\(watch\\(\\?v=\\|.+&v=\\)\\)?\\(v=\\)?\\)\\([-A-Za-z0-9_]\\)*\\(&.+\\)?"
+
+let is_url_from_youtube url =
+  Str.string_match youtube_reg url 0
+
+let normalize_youtube_url url =
+  (* README: Changing "uri_reg" may change the behavior of "extract_id url" because of "Str.group_end n"*)
+  let youtube_base_url = "http://www.youtube.com/watch/" in
+  let extract_id_from_url url =
+    let _ = Str.string_match youtube_reg url 0 in
+    let id_start = Str.group_end 4 and id_end = Str.group_end 9 in
+    String.sub url id_start (id_end - id_start)
+  in
+  if (is_url_from_youtube url) = false
+  then raise (Failed 1)
+  else (youtube_base_url ^ (extract_id_from_url url))
+
+(*** General Normalize ***)
+
 let rec read init channel =
   try read ( (input_line channel) :: init ) channel
   with End_of_file -> List.rev init
@@ -16,7 +36,6 @@ let python ?(imports=[]) cmds =
   let encoding = "#coding=utf-8" in
   let oneline = encoding ^ "\\n" ^ String.concat ";" (cmd_imports @ cmds) ^ ";" in
   let wrap_cmd = "echo \""^ oneline ^"\" | python" in
-  print_endline wrap_cmd;
   let cin = Unix.open_process_in wrap_cmd in
   let output = read [] cin in
   let status = Unix.close_process_in cin in
@@ -75,26 +94,15 @@ let rewrite_query url query =
 
 let internal_normalize dirty_url =
   let url = replaces dirty_url substitute_array in
-  rewrite_query url (limit_2params (sort_query url))
+  let normalized_url = rewrite_query url (limit_2params (sort_query url)) in
+  if is_url_from_youtube normalized_url
+  then normalize_youtube_url normalized_url
+  else normalized_url
 
 let normalize dirty_urls =
   let urls = urlnorm dirty_urls in
   List.map internal_normalize urls
 
-let normalize_youtube_url url =
-  (* README: Changing "uri_reg" may change the behavior of "extract_id url" because of "Str.group_end n"*)
-  let youtube_base_url = "http://www.youtube.com/watch/" in
-  let uri_reg =
-    Str.regexp "\\(https?://\\)?\\(www\\.\\)?youtu\\(\\.be/\\|be\\.com/\\)\\(\\(.+/\\)?\\(watch\\(\\?v=\\|.+&v=\\)\\)?\\(v=\\)?\\)\\([-A-Za-z0-9_]\\)*\\(&.+\\)?" in
-  let is_url_from_youtube url = Str.string_match uri_reg url 0 in
-  let extract_id_from_url url =
-    let _ = Str.string_match uri_reg url 0 in
-    let id_start = Str.group_end 4 and id_end = Str.group_end 9 in
-    String.sub url id_start (id_end - id_start)
-  in
-  if (is_url_from_youtube url) = false
-  then raise (Failed 1)
-  else (youtube_base_url ^ (extract_id_from_url url))
 
 let main () =
   let dirty_urls = [
@@ -117,10 +125,10 @@ let main () =
     "http://www.youtube.com/embed/v=iwGFalTRHDA";
     "http://www.youtube.com/watch?feature=player_embedded&v=iwGFalTRHDA";
     "http://www.youtube.com/watch?v=iwGFalTRHDA";
-    "www.youtube.com/watch?v=iwGFalTRHDA";
-    "www.youtu.be/iwGFalTRHDA";
-    "youtu.be/iwGFalTRHDA";
-    "youtube.com/watch?v=iwGFalTRHDA";
+    (* "www.youtube.com/watch?v=iwGFalTRHDA"; *)
+    (* "www.youtu.be/iwGFalTRHDA"; *)
+    (* "youtu.be/iwGFalTRHDA"; *)
+    (* "youtube.com/watch?v=iwGFalTRHDA"; *)
     "http://www.youtube.com/watch/iwGFalTRHDA";
     "http://www.youtube.com/v/iwGFalTRHDA";
     "http://www.youtube.com/v/i_GFalTRHDA";
@@ -131,7 +139,7 @@ let main () =
   ]
   in
   let urls = normalize dirty_urls in
-  let youtube_urls = List.map normalize_youtube_url youtube_urls in
+  let youtube_urls = normalize youtube_urls in
   print_endline "[Youtube Test] If working: url will look like \"http://www.youtube.com/watch/YOUTUBE_ID\"";
   List.iter print_endline youtube_urls;
   print_endline "[General Test] If working: urls will be well formated";
