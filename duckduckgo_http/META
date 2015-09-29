@@ -1,0 +1,5 @@
+name="duckduckgo_http"
+description="Ocaml duckduckgo binding"
+version="0.1"
+depends="lwt,lwt.unix,str"
+archive(byte)="duckduckgo_http.cma"
