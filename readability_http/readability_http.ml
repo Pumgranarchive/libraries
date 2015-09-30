@@ -24,7 +24,7 @@ let set_token str =
 *******************************************************************************)
 
 let get_parser iuri =
-  let str_iuri = Rdf_uri.string iuri in
+  let str_iuri = Uri.to_string iuri in
   let headers = Cohttp.Header.init_with "accept" "application/json" in
   let str_uri = readbility_uri ^ "?url=" ^ str_iuri ^ "&token=" ^ !token in
   let uri = Uri.of_string str_uri in

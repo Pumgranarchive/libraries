@@ -7,4 +7,4 @@
 val set_token : string -> unit
 
 (** Send request on the Readability parser  *)
-val get_parser : Rdf_uri.uri -> Yojson.Basic.json Lwt.t
+val get_parser : Uri.t -> Yojson.Basic.json Lwt.t

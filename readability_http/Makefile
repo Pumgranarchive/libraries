@@ -4,7 +4,7 @@ ML :=		readability_http.ml
 
 MLI :=		readability_http.mli
 
-PACKAGES :=	cohttp,cohttp.lwt,rdf,yojson
+PACKAGES :=	cohttp,cohttp.lwt,yojson
 
 CMX :=		$(ML:.ml=.cmx)
 CMO :=		$(ML:.ml=.cmo)
