@@ -1,0 +1,5 @@
+name="boilerpipe"
+description="Boilerpipe ocaml binding"
+version="0.1"
+depends="lwt,lwt.unix,cohttp"
+archive(byte)="boilerpipe.cma"

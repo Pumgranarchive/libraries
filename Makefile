@@ -5,10 +5,11 @@ DIRECTORIES :=	pghttp			\
 		pumgrana_http		\
 		pumgrana_client_http	\
 		readability_http	\
+		tidy			\
 		opencalais_http		\
 		freebase_youtube	\
 		dbpedia			\
-		tidy
+		boilerpipe
 
 DOC_DIR :=	doc/html
 
