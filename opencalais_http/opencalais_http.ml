@@ -1,30 +1,23 @@
-(*
-** Aim to make an http request and extract the received json
-*)
-
-(*
-** PRIVATE
+(**
+   {b OpenCalais -
+   A ocaml OpenCalais binding}
 *)
 
 open Yojson.Basic
 
-(* CONFIG *)
+(******************************************************************************
+****************************** Configuration **********************************
+*******************************************************************************)
 
-let opencalais_uri = Uri.of_string "http://api.opencalais.com/tag/rs/enrich"
+let opencalais_uri = ref (Uri.of_string "http://api.opencalais.com/tag/rs/enrich")
 let token = ref ""
 
-let set_token str =
-  token := str
+(******************************************************************************
+********************************** Tools **************************************
+*******************************************************************************)
 
-(* UTILS *)
-
-let get_results_from_request (header, body) =
-  lwt body_string = Cohttp_lwt_body.to_string body in
-  Lwt.return body_string
-
-let get_json_from_results display_body results  =
-  if display_body then print_endline results;
-  from_string results
+let set_uri = (:=) opencalais_uri
+let set_token = (:=) token
 
 let base_headers length =
   let headers = Cohttp.Header.init_with "accept" "application/json" in
@@ -33,20 +26,31 @@ let base_headers length =
   let headers = Cohttp.Header.add headers "content-length" (string_of_int length) in
   Cohttp.Header.add headers "enableMetadataType" "SocialTags"
 
-let request ?(display_body=false) body_str =
-  let body = ((Cohttp.Body.of_string body_str) :> Cohttp_lwt_body.t) in
-  let headers = base_headers (String.length body_str) in
-  lwt request_response =
-      Cohttp_lwt_unix.Client.post ~body ~chunked:false ~headers opencalais_uri
-  in
-  lwt result = get_results_from_request request_response in
-  Lwt.return (get_json_from_results display_body result)
+(******************************************************************************
+********************************* Binding *************************************
+*******************************************************************************)
 
-let tags_from_results json_tags =
+let request text =
+  let body = ((Cohttp.Body.of_string text) :> Cohttp_lwt_body.t) in
+  let length = String.length text in
+  let headers = base_headers length in
+  lwt (header, rbody) =
+      Cohttp_lwt_unix.Client.post ~body ~chunked:false ~headers !opencalais_uri
+  in
+  lwt rbody_string = Cohttp_lwt_body.to_string rbody in
+  Lwt.return (from_string rbody_string)
+
+let to_social_tags json =
   let open Yojson.Basic.Util in
-  let get_tags l (name, json) =
-    if String.compare (pretty_to_string (member "_typeGroup" json)) "\"socialTag\"" == 0
-    then (Str.global_replace (Str.regexp_string "_") " " (to_string (member "name" json)))::l
-    else l
-    in
-  List.fold_left get_tags [] (to_assoc json_tags)
+  let aux blist (title, elm) =
+    let type_group = member "_typeGroup" elm in
+    if (type_group != `Null &&
+        String.compare (to_string type_group) "socialTag" == 0)
+    then
+      let name = to_string (member "name" elm) in
+      let name' = Str.global_replace (Str.regexp "[_\\.]") " " name in
+      name'::blist
+    else blist
+  in
+  let list = to_assoc json in
+  List.fold_left aux [] list

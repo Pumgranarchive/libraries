@@ -3,13 +3,15 @@
    A ocaml OpenCalais binding}
 *)
 
-(** set OpenCalais token *)
+(** set your OpenCalais uri, default 'http://api.opencalais.com/tag/rs/enrich' *)
+val set_uri : Uri.t -> unit
+
+(** set your OpenCalais token, no default value *)
 val set_token : string -> unit
 
-(** Ask OpenCalais API with a [string] content.
-The result is a [json] content with all OpenCalais informations about the [string].
-[display_body] is an option to display the result if set to true.*)
-val request : ?display_body:bool -> string -> Yojson.Basic.json Lwt.t
+(** [request text] *)
+val request : string -> Yojson.Basic.json Lwt.t
 
-(** fetch the social_tags attribute of [json] list. this function return a [string list] *)
-val tags_from_results : Yojson.Basic.json -> string list
+(** [to_social_tags result]
+    Extract social tags from the json result  *)
+val to_social_tags : Yojson.Basic.json -> string list
