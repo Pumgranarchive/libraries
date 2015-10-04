@@ -43,7 +43,7 @@ let python ?(imports=[]) cmds =
 
 let urlnorm urls =
   let imports = ["urlnorm"] in
-  let make_cmd url = "print(urlnorm.norm(u'"^ url ^"').encode('utf-8'))" in
+  let make_cmd url = "print(urlnorm.norm(u'''"^ url ^"''').encode('utf-8'))" in
   let cmds = List.map make_cmd urls in
   python ~imports cmds
 
