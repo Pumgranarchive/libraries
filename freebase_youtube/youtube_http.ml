@@ -172,6 +172,11 @@ let videos_of_json json =
 ** PUBLIC
 *)
 
+(*** Util ***)
+let is_url_from_youtube url =
+  let youtube_reg = Str.regexp "\\(https?://\\)?\\(www\\.\\)?youtu\\(\\.be/\\|be\\.com/\\)\\(\\(.+/\\)?\\(watch\\(\\?v=\\|.+&v=\\)\\)?\\(v=\\)?\\)\\([-A-Za-z0-9_]\\)*\\(&.+\\)?" in
+  Str.string_match youtube_reg url 0
+
 (*** Constructors ***)
 (** create an id from a youtube url.
     An exception will be raised if the url is not correct *)

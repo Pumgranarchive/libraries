@@ -15,6 +15,9 @@ type video = (video_id * title * url * sliced_description * categories)
 exception BadYoutubeUrl of string
 exception Youtube of string
 
+(*** Util ***)
+val is_url_from_youtube : string -> bool
+
 (*** Constructors ***)
 (** create an id from a youtube url.
     An exception will be raised if the url is not correct *)
