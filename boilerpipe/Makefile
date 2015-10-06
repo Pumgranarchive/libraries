@@ -1,4 +1,5 @@
 NAME :=		boilerpipe
+JAR :=		jar/simpleboilerpipe.jar
 
 ML :=		boilerpipe.ml
 
@@ -25,7 +26,13 @@ all:		$(NAME) lib
 
 re:		clean all
 
-$(NAME):	.depend $(CMI) $(CMO)
+$(JAR):
+		cp jar/boilerpipe.jar java/.
+		cd java && javac -extdirs ../jar/ simpleboilerpipe/simpleboilerpipe.java
+		cd java && jar cmf0 MANIFEST.MF ../$@ simpleboilerpipe/simpleboilerpipe.class org/* boilerpipe.jar
+		rm java/boilerpipe.jar
+
+$(NAME):	$(JAR) .depend $(CMI) $(CMO)
 		$(OCAMLC) -linkpkg $(CMO) -o $@
 
 lib:		.depend $(CMI) $(CMO)

@@ -39,9 +39,9 @@ let boilerpipe mode uri =
   let () = is_valid status in
   Lwt.return output
 
-(* let main () = *)
-(*   let uri = Uri.of_string "http://www.bbc.com/sport/0/rugby-union/34385603" in *)
-(*   lwt res = boilerpipe Article uri in *)
-(*   Lwt.return (List.iter print_endline res) *)
+let main () =
+  let uri = Uri.of_string "http://www.bbc.com/sport/0/rugby-union/34385603" in
+  lwt res = boilerpipe Article uri in
+  Lwt.return (List.iter print_endline res)
 
 (* lwt () = main () *)

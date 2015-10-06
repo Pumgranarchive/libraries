@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Rsrc-Class-Path: ./ boilerpipe.jar
+Class-Path: .
+Rsrc-Main-Class: simpleboilerpipe.simpleboilerpipe
+Main-Class: org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader
+
