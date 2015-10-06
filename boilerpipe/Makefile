@@ -39,7 +39,7 @@ $(JAR_LIB):
 $(NAME):	$(JAR_LIB) .depend $(CMI) $(CMO)
 		$(OCAMLC) -linkpkg $(CMO) -o $@
 
-lib:		.depend $(CMI) $(CMO)
+lib:		$(JAR_LIB) .depend $(CMI) $(CMO)
 		$(OCAMLC) -a $(CMO) -o $(NAME).cma
 
 install:	$(CMI) $(CMX) $(CMO) lib
