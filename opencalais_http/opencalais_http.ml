@@ -9,7 +9,8 @@ open Yojson.Basic
 ****************************** Configuration **********************************
 *******************************************************************************)
 
-let opencalais_uri = ref (Uri.of_string "http://api.opencalais.com/tag/rs/enrich")
+(* let opencalais_uri = ref (Uri.of_string "http://api.opencalais.com/tag/rs/enrich") *)
+let opencalais_uri = ref (Uri.of_string "https://api.thomsonreuters.com/permid/calais")
 let token = ref ""
 
 (******************************************************************************
@@ -21,9 +22,9 @@ let set_token = (:=) token
 
 let base_headers length =
   let headers = Cohttp.Header.init_with "accept" "application/json" in
-  (* let headers = Cohttp.Header.add headers "x-calais-licenseID" !token in *)
   let headers = Cohttp.Header.add headers "x-ag-access-token" !token in
   let headers = Cohttp.Header.add headers "content-type" "text/html" in
+  let headers = Cohttp.Header.add headers "outputformat" "application/json" in
   let headers = Cohttp.Header.add headers "content-length" (string_of_int length) in
   Cohttp.Header.add headers "enableMetadataType" "SocialTags"
 
