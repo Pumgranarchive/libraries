@@ -9,7 +9,7 @@ exception Stopped of int
 
 type mode = Article | Default
 
-let jar_path = ref "jar/simpleboilerpipe.jar"
+let jar_path = ref "%%JAR_PATH%%"
 
 let set_jar_path = (:=) jar_path
 

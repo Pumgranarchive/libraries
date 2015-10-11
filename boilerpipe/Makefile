@@ -1,10 +1,11 @@
 NAME :=		boilerpipe
-JAR :=		jar/simpleboilerpipe.jar
+
+JAR_NAME :=	simpleboilerpipe.jar
+JAR_LIB :=	jar/$(JAR_NAME)
 
 ML :=		boilerpipe.ml
 
 MLI :=		boilerpipe.mli
-
 
 PACKAGES :=	lwt,lwt.unix,cohttp
 
@@ -22,24 +23,27 @@ OCAMLDEP :=	$(OCAMLFIND) ocamldep $(SYNTAX) $(LIB)
 
 RM :=		rm -fv
 
+LIB_PATH :=	$(shell ocamlfind printconf | grep "lib" | head -n 2 | tail -n 1 | sed "s/ //g")
+JAR_PATH :=	$(LIB_PATH)/$(NAME)/$(JAR_NAME)
+
 all:		$(NAME) lib
 
 re:		clean all
 
-$(JAR):
+$(JAR_LIB):
 		cp jar/boilerpipe.jar java/.
 		cd java && javac -extdirs ../jar/ simpleboilerpipe/simpleboilerpipe.java
 		cd java && jar cmf0 MANIFEST.MF ../$@ simpleboilerpipe/simpleboilerpipe.class org/* boilerpipe.jar
 		rm java/boilerpipe.jar
 
-$(NAME):	$(JAR) .depend $(CMI) $(CMO)
+$(NAME):	$(JAR_LIB) .depend $(CMI) $(CMO)
 		$(OCAMLC) -linkpkg $(CMO) -o $@
 
-lib:		.depend $(CMI) $(CMO)
+lib:		$(JAR_LIB) .depend $(CMI) $(CMO)
 		$(OCAMLC) -a $(CMO) -o $(NAME).cma
 
 install:	$(CMI) $(CMX) $(CMO) lib
-		$(OCAMLFIND) install $(NAME) META $(NAME).cma $(CMI) $(CMX) $(CMO)
+		$(OCAMLFIND) install $(NAME) META $(NAME).cma $(CMI) $(CMX) $(CMO) $(JAR_LIB)
 
 uninstall:
 		$(OCAMLFIND) remove $(NAME)
@@ -53,16 +57,25 @@ doc:
 .SUFFIXES:	.ml .mli .cmo .cmi .cmx
 
 .ml.cmx:
+		sed "s\%%JAR_PATH%%\$(JAR_PATH)\g" $< > $<.tmp
+		mv $< $<.2 && mv $<.tmp $<
 		$(OCAMLOPT) -c $<
+		mv $<.2 $<
 
 .ml.cmo:
+		sed "s\%%JAR_PATH%%\$(JAR_PATH)\g" $< > $<.tmp
+		mv $< $<.2 && mv $<.tmp $<
 		$(OCAMLC) -c $<
+		mv $<.2 $<
 
 .mli.cmi:
+		sed "s\%%JAR_PATH%%\$(JAR_PATH)\g" $< > $<.tmp
+		mv $< $<.2 && mv $<.tmp $<
 		$(OCAMLC) -c $<
+		mv $<.2 $<
 
 clean:
-		@$(RM) *.cm[iox] *.o
+		@$(RM) *.cm[iox] *.o *.tmp
 		@$(RM) $(NAME) $(NAME).cma
 
 .depend:
