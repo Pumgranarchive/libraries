@@ -40,7 +40,7 @@ PREFIX owl: <http://www.w3.org/2002/07/owl#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-PREFIX dbterms: <http://purl.org/dc/terms/>
+PREFIX dcterms: <http://purl.org/dc/terms/>
 
 SELECT DISTINCT ?title ?abstract ?wikiPage ?isPrimaryTopicOf ?label (group_concat(distinct ?subject;separator=\";\") as ?subject)
 WHERE
@@ -75,7 +75,7 @@ PREFIX owl: <http://www.w3.org/2002/07/owl#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-PREFIX dbterms: <http://purl.org/dc/terms/>
+PREFIX dcterms: <http://purl.org/dc/terms/>
 
 SELECT DISTINCT ?title ?abstract ?wikiPage ?isPrimaryTopicOf ?label (group_concat(distinct ?subject;separator=\";\") as ?subject)
 WHERE
@@ -107,7 +107,7 @@ let get_discography_query_infos band_name =
     query = "
 PREFIX dbres: <http://dbpedia.org/resource/>
 PREFIX dbprop: <http://dbpedia.org/property/>
-PREFIx dbpedia-owl: <http://dbpedia.org/ontology/>
+PREFIX dbpedia-owl: <http://dbpedia.org/ontology/>
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -116,7 +116,7 @@ PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 SELECT DISTINCT ?song ?song_name ?album WHERE {
   ?band dbprop:name  \"" ^ band_name ^ "\"@en .
   ?song dbpedia-owl:musicalArtist ?band .
-  ?song dbpprop:fromAlbum ?album .
+  ?song dbprop:fromAlbum ?album .
   ?song dbprop:name ?song_name .
 }"
   }
