@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Rsrc-Class-Path: ./ xtractor-1.0-SNAPSHOT.jar org.json-20120521.jar an
+ t-1.6.5.jar bitlyj-2.0.0.jar commons-codec-1.6.jar commons-logging-1.
+ 1.1.jar ecj-3.5.1.jar httpasyncclient-4.0-beta3.jar httpclient-4.2.1.
+ jar httpcore-4.2.2.jar httpcore-nio-4.2.2.jar jetty-continuation-7.6.
+ 0.v20120127.jar jetty-http-7.6.0.v20120127.jar jetty-io-7.6.0.v201201
+ 27.jar jetty-security-7.6.0.v20120127.jar jetty-server-7.6.0.v2012012
+ 7.jar jetty-servlet-7.6.0.v20120127.jar jetty-util-7.6.0.v20120127.ja
+ r jetty-webapp-7.6.0.v20120127.jar jetty-xml-7.6.0.v20120127.jar jsou
+ p-1.7.2.jar jsp-2.1-glassfish-2.1.v20100127.jar jsp-api-2.1-glassfish
+ -2.1.v20100127.jar jwnl-1.3.3.jar opennlp-maxent-3.0.2-incubating.jar
+  opennlp-tools-1.5.2-incubating.jar servlet-api-2.5.jar
+Class-Path: .
+Rsrc-Main-Class: simplextractor.simplextractor
+Main-Class: org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader

@@ -9,7 +9,8 @@ DIRECTORIES :=	pghttp			\
 		opencalais_http		\
 		freebase_youtube	\
 		dbpedia			\
-		boilerpipe
+		boilerpipe		\
+		xtractor
 
 DOC_DIR :=	doc/html
 

@@ -1,0 +1,5 @@
+name="xtractor"
+description="Xtractor ocaml binding"
+version="0.1"
+depends="lwt,lwt.unix,cohttp"
+archive(byte)="xtractor.cma"
