@@ -82,6 +82,7 @@ doc:
 
 clean:
 		@$(RM) *.cm[iox] *.o *.tmp
+		@$(RM) java/simplextractor/*.class
 		@$(RM) $(NAME) $(NAME).cma jar lib java/*.jar
 
 .depend:
