@@ -7,7 +7,8 @@ exception Failed of int
 exception Killed of int
 exception Stopped of int
 
-type document = { title: string; body: string; summary: string;
+(** content: html content; body: article body  *)
+type document = { title: string; content: string; body: string; summary: string;
                   image: string; video: string }
 
 (** Set the jar path, default is '/home/nox/.opam/4.00.1/lib/xtractor/simplextractor.jar' *)

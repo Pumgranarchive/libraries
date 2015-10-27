@@ -31,10 +31,16 @@ all:		$(NAME) lib
 re:		clean all
 
 java/org.json-20120521.jar:
-		wget https://org-json-java.googlecode.com/files/org.json-20120521.jar
+		wget "https://org-json-java.googlecode.com/files/org.json-20120521.jar"
 		mv org.json-20120521.jar java/.
 
-$(JAR_LIB):	java/org.json-20120521.jar
+java/commons-io-2.4.jar:
+		wget "http://apache.websitebeheerjd.nl//commons/io/binaries/commons-io-2.4-bin.tar.gz"
+		tar -xf commons-io-2.4-bin.tar.gz
+		cp commons-io-2.4/commons-io-2.4.jar java/.
+		rm -rf commons-io-2.4 commons-io-2.4-bin.tar.gz
+
+$(JAR_LIB):	java/org.json-20120521.jar java/commons-io-2.4.jar
 		./setup.sh
 		cp lib/xtractor/target/dependency/*.jar java/.
 		cp lib/xtractor/target/*.jar java/.

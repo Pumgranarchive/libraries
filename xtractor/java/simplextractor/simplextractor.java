@@ -1,5 +1,9 @@
 package simplextractor;
 
+import java.io.ByteArrayInputStream;
+import java.io.StringWriter;
+
+import org.apache.commons.io.IOUtils;
 import org.json.JSONObject;
 
 import com.mohaps.tldr.summarize.Factory;
@@ -27,6 +31,12 @@ public class simplextractor
             FetchResult fResult = fetcher.fetch(url);
             ExtractorResult eResult = extractor.extract(fResult.getContent(), fResult.getCharset(), fResult.getActualUrl());
 
+            ByteArrayInputStream inputStream = new ByteArrayInputStream(fResult.getContent());
+            StringWriter writer = new StringWriter();
+            IOUtils.copy(inputStream, writer, fResult.getCharset());
+            String content = writer.toString().replaceAll("( |\t|\n)+", " ").replaceAll(" ?> ?", ">").replaceAll(" ?< ?", "<").replaceAll(" ?; ?", ";");
+
+
             // System.out.print("title:  \t"+ SHelper.replaceSmartQuotes(eResult.getTitle()) + "\n");
             // System.out.print("summary:\t"+ SHelper.replaceSmartQuotes(summarizer.summarize(eResult.getText(), summarySentenceNb)) + "\n");
             // System.out.print("image:  \t"+ eResult.getImage() + "\n");
@@ -40,6 +50,7 @@ public class simplextractor
             json.put("summary", SHelper.replaceSmartQuotes(summarizer.summarize(eResult.getText(), 2)));
             json.put("image", eResult.getImage());
             json.put("video", eResult.getVideo());
+            json.put("content", content);
             System.out.print(json.toString());
 
             fetcher.shutdown();

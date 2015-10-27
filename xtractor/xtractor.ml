@@ -9,7 +9,7 @@ exception Failed of int
 exception Killed of int
 exception Stopped of int
 
-type document = { title: string; body: string; summary: string;
+type document = { title: string; content: string; body: string; summary: string;
                   image: string; video: string }
 
 let jar_path = ref "/home/nox/.opam/4.00.1/lib/xtractor/simplextractor.jar"
@@ -33,6 +33,7 @@ let format lines =
   let output = String.concat "" lines in
   let json = Yojson.from_string output in
   { title = to_string (member "title" json);
+    content = to_string (member "content" json);
     body = to_string (member "body" json);
     summary = to_string (member "summary" json);
     image = to_string (member "image" json);
@@ -49,6 +50,7 @@ let xtractor uri =
 
 let print doc =
   print_endline ("title:   \t" ^ doc.title);
+  print_endline ("content:   \t" ^ doc.content);
   print_endline ("body:   \t" ^ doc.body);
   print_endline ("summary:   \t" ^ doc.summary);
   print_endline ("image:   \t" ^ doc.image);
