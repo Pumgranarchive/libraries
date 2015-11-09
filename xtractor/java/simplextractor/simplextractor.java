@@ -47,7 +47,7 @@ public class simplextractor
             JSONObject json = new JSONObject();
             json.put("title", SHelper.replaceSmartQuotes(eResult.getTitle()));
             json.put("body", SHelper.replaceSmartQuotes(eResult.getText()));
-            json.put("summary", SHelper.replaceSmartQuotes(summarizer.summarize(eResult.getText(), 2)));
+            json.put("summary", SHelper.replaceSmartQuotes(summarizer.summarize(eResult.getText(), summarySentenceNb)));
             json.put("image", eResult.getImage());
             json.put("video", eResult.getVideo());
             json.put("content", content);
