@@ -27,8 +27,9 @@ public class simplextractor
             ISummarizer summarizer = Factory.getSummarizer();
 
             int summarySentenceNb = 1;
+            long timeout = 5000; // 5s
             String url = args[0];
-            FetchResult fResult = fetcher.fetch(url);
+            FetchResult fResult = fetcher.fetch(url, timeout);
             ExtractorResult eResult = extractor.extract(fResult.getContent(), fResult.getCharset(), fResult.getActualUrl());
 
             ByteArrayInputStream inputStream = new ByteArrayInputStream(fResult.getContent());
