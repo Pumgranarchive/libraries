@@ -27,8 +27,9 @@ public class simplextractor
             ISummarizer summarizer = Factory.getSummarizer();
 
             int summarySentenceNb = 1;
+            long timeout = 5000; // 5s
             String url = args[0];
-            FetchResult fResult = fetcher.fetch(url);
+            FetchResult fResult = fetcher.fetch(url, timeout);
             ExtractorResult eResult = extractor.extract(fResult.getContent(), fResult.getCharset(), fResult.getActualUrl());
 
             ByteArrayInputStream inputStream = new ByteArrayInputStream(fResult.getContent());
@@ -47,7 +48,7 @@ public class simplextractor
             JSONObject json = new JSONObject();
             json.put("title", SHelper.replaceSmartQuotes(eResult.getTitle()));
             json.put("body", SHelper.replaceSmartQuotes(eResult.getText()));
-            json.put("summary", SHelper.replaceSmartQuotes(summarizer.summarize(eResult.getText(), 2)));
+            json.put("summary", SHelper.replaceSmartQuotes(summarizer.summarize(eResult.getText(), summarySentenceNb)));
             json.put("image", eResult.getImage());
             json.put("video", eResult.getVideo());
             json.put("content", content);
