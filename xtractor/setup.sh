@@ -9,6 +9,7 @@ if [ ! -d "lib/xtractor" ]; then
     git clone git@github.com:ArnaudParant/xtractor.git lib/xtractor
     cd lib/xtractor
     git checkout optimized
+    sudo apt-get install maven
     mvn clean install -Dmaven.compiler.source=$JAVA_VERSION -Dmaven.compiler.target=$JAVA_VERSION
 
 fi
