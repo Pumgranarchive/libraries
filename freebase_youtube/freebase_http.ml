@@ -63,6 +63,9 @@ let get_value_field json =
 let get_id_field json =
   Yojson_wrap.(to_string (member "id" json))
 
+let get_error_field json =
+  Yojson_wrap.member "error" json
+
 let get_text_field json =
   Yojson_wrap.(to_string (member "text" json))
 
@@ -123,6 +126,14 @@ let freebase_object_of_json json =
   in
   (id, name, sliced_description, social_media_presences, types, wiki_url)
 
+let is_an_error_object freebase_object =
+  let error = get_error_field freebase_object
+  in
+  match error with
+    | `Null       -> false
+    | _           -> true
+
+
 (*
 ** PUBLIC
 *)
@@ -157,6 +168,7 @@ let search query =
     Lwt.return (freebase_json)
   with e -> raise (Freebase (get_exc_string e))
 
+
 (* TODO: ids must become a list *)
 (**
 ** return a list of freebase basic object from a list of topic_ids
@@ -177,7 +189,9 @@ let get_topics ids =
         1000
         "en"
     in
-    lwt freebase_json = Http_request_manager.request ~display_body:false url
+    lwt freebase_json = Http_request_manager.request ~display_body:true url
     in
-    Lwt.return (freebase_object_of_json freebase_json)
+    if is_an_error_object freebase_json
+    then (Lwt.return None)
+    else (Lwt.return (Some (freebase_object_of_json freebase_json)))
   with e -> raise (Freebase (get_exc_string e))
