@@ -31,7 +31,7 @@ type video = (video_id * title * url * sliced_description * categories)
 
 (*** Conf ***)
 (* API Key *)
-let g_youtube_api_key = "AIzaSyBlcjTwKF9UmOqnnExTZGgdY9nwS_0C5A8"
+let g_youtube_api_key = "AIzaSyDheIAtuCt-FxQYfuzmI4r1yWeAQbCC9eM"
 
 (* youtube url *)
 let g_api_base_url = "https://www.googleapis.com/youtube/v3/"
