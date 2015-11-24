@@ -1,6 +1,6 @@
 #!/bin/bash
 
-JAVA_VERSION="1.8"
+JAVA_VERSION=`java -version 2>&1 | head -n 1 | awk -F'"' '{print $2}' | sed -r 's/\.([0-9]+)_([0-9]+)$//g'`
 
 if [ ! -d "lib/xtractor" ]; then
 
