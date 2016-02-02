@@ -2,6 +2,10 @@ package simplextractor;
 
 import java.io.ByteArrayInputStream;
 import java.io.StringWriter;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
 import org.json.JSONObject;
@@ -17,51 +21,57 @@ import de.jetwick.snacktory.SHelper;
 
 public class simplextractor
 {
+    private static InputStream readInput(int contentLength)
+    {
+        BufferedReader bufferReader = new BufferedReader(new InputStreamReader(System.in));
+
+        int length = 0;
+        String content = "";
+        while (length < contentLength)
+        {
+            try
+            {
+                String line = bufferReader.readLine();
+                length += line.length() + 1;
+                content += line;
+            }
+            catch (Throwable ex)
+            {
+                break;
+            }
+        }
+
+        return (new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)));
+    }
+
     public static void main(String[] args) throws Exception
     {
-        Fetcher fetcher = new Fetcher();
-
         try
         {
-            Extractor extractor = new Extractor(fetcher);
+            Extractor extractor = new Extractor(null);
             ISummarizer summarizer = Factory.getSummarizer();
 
             int summarySentenceNb = 1;
-            long timeout = 5000; // 5s
             String url = args[0];
-            FetchResult fResult = fetcher.fetch(url, timeout);
-            ExtractorResult eResult = extractor.extract(fResult.getContent(), fResult.getCharset(), fResult.getActualUrl());
-
-            ByteArrayInputStream inputStream = new ByteArrayInputStream(fResult.getContent());
-            StringWriter writer = new StringWriter();
-            IOUtils.copy(inputStream, writer, fResult.getCharset());
-            String content = writer.toString().replaceAll("( |\t|\n)+", " ").replaceAll(" ?> ?", ">").replaceAll(" ?< ?", "<").replaceAll(" ?; ?", ";");
-
-
-            // System.out.print("title:  \t"+ SHelper.replaceSmartQuotes(eResult.getTitle()) + "\n");
-            // System.out.print("summary:\t"+ SHelper.replaceSmartQuotes(summarizer.summarize(eResult.getText(), summarySentenceNb)) + "\n");
-            // System.out.print("image:  \t"+ eResult.getImage() + "\n");
-            // System.out.print("video:  \t"+ eResult.getVideo() + "\n");
-            // System.out.print("body:   \t"+ SHelper.replaceSmartQuotes(eResult.getText()) + "\n");
-            // System.out.print("\n");
+            int contentLength = Integer.parseInt(args[1]);
+            InputStream html = readInput(contentLength);
+            String charset = "UTF-8";
+            ExtractorResult extracted = extractor.extract(html, charset, url);
+            String summary = summarizer.summarize(extracted.getText(), summarySentenceNb);
 
             JSONObject json = new JSONObject();
-            json.put("title", SHelper.replaceSmartQuotes(eResult.getTitle()));
-            json.put("body", SHelper.replaceSmartQuotes(eResult.getText()));
-            json.put("summary", SHelper.replaceSmartQuotes(summarizer.summarize(eResult.getText(), summarySentenceNb)));
-            json.put("image", eResult.getImage());
-            json.put("video", eResult.getVideo());
-            json.put("content", content);
+            json.put("title", SHelper.replaceSmartQuotes(extracted.getTitle()));
+            json.put("body", SHelper.replaceSmartQuotes(extracted.getText()));
+            json.put("summary", SHelper.replaceSmartQuotes(summary));
+            // json.put("image", extracted.getImage());
+            // json.put("video", extracted.getVideo());
             System.out.print(json.toString());
 
-            fetcher.shutdown();
         }
         catch (Throwable ex)
         {
             ex.printStackTrace();
-            fetcher.shutdown();
         }
-
 
     }
 }

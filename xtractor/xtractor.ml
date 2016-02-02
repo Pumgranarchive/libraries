@@ -9,8 +9,7 @@ exception Failed of int
 exception Killed of int
 exception Stopped of int
 
-type document = { title: string; content: string; body: string; summary: string;
-                  image: string; video: string }
+type document = { title: string; body: string; summary: string }
 
 let jar_path = ref "/home/nox/.opam/4.00.1/lib/xtractor/simplextractor.jar"
 
@@ -33,16 +32,15 @@ let format lines =
   let output = String.concat "" lines in
   let json = Yojson.from_string output in
   { title = to_string (member "title" json);
-    content = to_string (member "content" json);
     body = to_string (member "body" json);
-    summary = to_string (member "summary" json);
-    image = to_string (member "image" json);
-    video = to_string (member "video" json) }
+    summary = to_string (member "summary" json) }
 
-let xtractor uri =
+let xtractor uri content =
   let str_uri = Uri.to_string uri in
-  let command = ("java", [| "java"; "-jar"; !jar_path; str_uri |]) in
-  let process = Lwt_process.open_process_in command in
+  let contentLength = string_of_int (String.length content) in
+  let command = ("java", [| "java"; "-jar"; !jar_path; str_uri; contentLength |]) in
+  let process = Lwt_process.open_process command in
+  lwt () = Lwt_io.write_line process#stdin content in
   lwt output = read [] process#stdout in
   lwt status = process#close in
   let () = is_valid status in
@@ -50,15 +48,13 @@ let xtractor uri =
 
 let print doc =
   print_endline ("title:   \t" ^ doc.title);
-  print_endline ("content:   \t" ^ doc.content);
   print_endline ("body:   \t" ^ doc.body);
-  print_endline ("summary:   \t" ^ doc.summary);
-  print_endline ("image:   \t" ^ doc.image);
-  print_endline ("video:   \t" ^ doc.video)
+  print_endline ("summary:   \t" ^ doc.summary)
 
-let main () =
-  let uri = Uri.of_string "http://www.bbc.com/sport/0/rugby-union/34385603" in
-  lwt res = xtractor uri in
+let basical_test () =
+  let uri = Uri.of_string "http://www.random.com" in
+  let html = "<html><body><div>Hello World</div></body></html>" in
+  lwt res = xtractor uri html in
   Lwt.return (print res)
 
-(* lwt () = main () *)
+(* lwt () = basical_test () *)
