@@ -36,10 +36,12 @@ let python ?(imports=[]) cmds =
   let encoding = "#coding=utf-8" in
   let oneline = encoding ^ "\\n" ^ String.concat ";" (cmd_imports @ cmds) ^ ";" in
   let wrap_cmd = "echo \""^ oneline ^"\" | python" in
-  let cin = Unix.open_process_in wrap_cmd in
-  let output = read [] cin in
-  let status = Unix.close_process_in cin in
-  begin is_valid status; output end
+  try
+    let cin = Unix.open_process_in wrap_cmd in
+    let output = read [] cin in
+    let status = Unix.close_process_in cin in
+    begin is_valid status; output end
+  with _ -> []                          (* Catch process exception *)
 
 let urlnorm urls =
   let imports = ["urlnorm"] in
