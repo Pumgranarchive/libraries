@@ -31,7 +31,8 @@ type video = (video_id * title * url * sliced_description * categories)
 
 (*** Conf ***)
 (* API Key *)
-let g_youtube_api_key = "AIzaSyDheIAtuCt-FxQYfuzmI4r1yWeAQbCC9eM"
+let g_youtube_api_key = ref ""
+(* let g_youtube_api_key = "AIzaSyDheIAtuCt-FxQYfuzmI4r1yWeAQbCC9eM" *)
 
 (* youtube url *)
 let g_api_base_url = "https://www.googleapis.com/youtube/v3/"
@@ -51,7 +52,7 @@ let create_search_url ?query ?topic_id parts fields max_results type_of_result =
   ^ "&maxResults=" ^ max_results
   ^ (add_opt "&topicId=" topic_id)
   ^ (add_opt "&q=" query)
-  ^ "&key=" ^ g_youtube_api_key
+  ^ "&key=" ^ !g_youtube_api_key
 
 let create_video_url video_ids parts fields =
   let ids = List.map snd video_ids in
@@ -59,7 +60,7 @@ let create_video_url video_ids parts fields =
   ^ "videos?id=" ^ (Bfy_helpers.strings_of_list ids ",")
   ^ "&part=" ^ parts
   ^ "&fields=" ^ fields
-  ^ "&key=" ^ g_youtube_api_key
+  ^ "&key=" ^ !g_youtube_api_key
 
 let create_playlist_item_url playlist_id ?(page_token = None) max_results parts fields  =
   let page_token =
@@ -70,7 +71,7 @@ let create_playlist_item_url playlist_id ?(page_token = None) max_results parts 
   ^ "&maxResults=" ^ max_results
   ^ "&part=" ^ parts
   ^ "&fields=" ^ fields
-  ^ "&key=" ^ g_youtube_api_key
+  ^ "&key=" ^ !g_youtube_api_key
 
 let create_channel_url_from_id ?(id = None) ?(user_name = None) parts fields =
   let id =
@@ -83,7 +84,7 @@ let create_channel_url_from_id ?(id = None) ?(user_name = None) parts fields =
   ^ user_name
   ^ "&part=" ^ parts
   ^ "&fields=" ^ fields
-  ^ "&key=" ^ g_youtube_api_key
+  ^ "&key=" ^ !g_youtube_api_key
 
 (*** json accessors ***)
 let get_nextPageToken_field json =
@@ -173,6 +174,10 @@ let videos_of_json json =
 *)
 
 (*** Util ***)
+
+let set_token str =
+  g_youtube_api_key := str
+
 let is_url_from_youtube url =
   let youtube_reg = Str.regexp "\\(https?://\\)?\\(www\\.\\)?youtu\\(\\.be/\\|be\\.com/\\)\\(\\(.+/\\)?\\(watch\\(\\?v=\\|.+&v=\\)\\)?\\(v=\\)?\\)\\([-A-Za-z0-9_]\\)*\\(&.+\\)?" in
   Str.string_match youtube_reg url 0

@@ -16,6 +16,7 @@ exception BadYoutubeUrl of string
 exception Youtube of string
 
 (*** Util ***)
+val set_token : string -> unit
 val is_url_from_youtube : string -> bool
 
 (*** Constructors ***)
