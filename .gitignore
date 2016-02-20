@@ -1,0 +1,17 @@
+# Ocaml
+*.cmo
+*.cma
+*.cmi
+*.a
+*.o
+*.cmx
+*.cmxs
+*.cmxa
+*.depend
+
+# Java
+*.class
+boilerpipe/jar/simpleboilerpipe.jar
+xtractor/jar
+xtractor/lib
+xtractor/java/*.jar
