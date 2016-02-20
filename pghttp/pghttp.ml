@@ -19,22 +19,22 @@ let extract_rediction request =
   let code = Cohttp.Code.code_of_status status in
   if code == 301 then extract_url response else Lwt.return None
 
-let rec request_manager requester url =
+let rec request_manager requester max_move url =
   let request = requester url in
   lwt redirection = extract_rediction request in
   match redirection with
-  | Some r_url  -> request_manager requester r_url
-  | None        -> request
+  | Some dest when max_move > 0 -> request_manager requester (max_move - 1) dest
+  | _ -> request  (* None or max_move <= 0 *)
 
 (******************************************************************************
 ********************************** Binding ************************************
 *******************************************************************************)
 
 let get ?headers =
-  request_manager (Cohttp_lwt_unix.Client.get ?headers)
+  request_manager (Cohttp_lwt_unix.Client.get ?headers) 1
 
 let post ?body ?chunked ?headers =
-  request_manager (Cohttp_lwt_unix.Client.post ?body ?chunked ?headers)
+  request_manager (Cohttp_lwt_unix.Client.post ?body ?chunked ?headers) 1
 
 (******************************************************************************
 *********************************** Test **************************************
