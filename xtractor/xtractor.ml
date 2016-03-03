@@ -11,7 +11,7 @@ exception Stopped of int
 
 type document = { title: string; body: string; summary: string }
 
-let jar_path = ref "/home/nox/.opam/4.00.1/lib/xtractor/simplextractor.jar"
+let jar_path = ref "%%JAR_PATH%%"
 
 let set_jar_path = (:=) jar_path
 
