@@ -40,13 +40,17 @@ java/commons-io-2.4.jar:
 		cp commons-io-2.4/commons-io-2.4.jar java/.
 		rm -rf commons-io-2.4 commons-io-2.4-bin.tar.gz
 
-$(JAR_LIB):	java/org.json-20120521.jar java/commons-io-2.4.jar
+java/xtractor-1.0-SNAPSHOT.jar:
 		./setup.sh
 		cp lib/xtractor/target/dependency/*.jar java/.
 		cp lib/xtractor/target/*.jar java/.
-		cd java && javac -extdirs . simplextractor/simplextractor.java
+
+%.class:	%.java
+		cd java && javac -extdirs . $(subst java/,,$<)
+
+$(JAR_LIB):	java/xtractor-1.0-SNAPSHOT.jar java/org.json-20120521.jar java/commons-io-2.4.jar java/simplextractor/simplextractor.class
 		mkdir -p jar
-		cd java && jar cmf0 MANIFEST.MF ../$@ org/* simplextractor/simplextractor.class *.jar
+		cd java && jar cmf0 MANIFEST.MF ../$@ org/* simplextractor/*.class *.jar
 
 $(NAME):	$(JAR_LIB) .depend $(CMI) $(CMO)
 		$(OCAMLC) -linkpkg $(CMO) -o $@
