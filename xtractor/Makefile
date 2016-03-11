@@ -3,7 +3,8 @@ NAME :=		xtractor
 JAR_NAME :=	simplextractor.jar
 JAR_LIB :=	jar/$(JAR_NAME)
 
-ML :=		xtractor.ml
+ML :=		xtractorPath.ml	\
+		xtractor.ml
 
 MLI :=		xtractor.mli
 
@@ -45,9 +46,6 @@ java/xtractor-1.0-SNAPSHOT.jar:
 		cp lib/xtractor/target/dependency/*.jar java/.
 		cp lib/xtractor/target/*.jar java/.
 
-%.class:	%.java
-		cd java && javac -extdirs . $(subst java/,,$<)
-
 $(JAR_LIB):	java/xtractor-1.0-SNAPSHOT.jar java/org.json-20120521.jar java/commons-io-2.4.jar java/simplextractor/simplextractor.class
 		mkdir -p jar
 		cd java && jar cmf0 MANIFEST.MF ../$@ org/* simplextractor/*.class *.jar
@@ -70,28 +68,26 @@ doc:
 		mkdir -p $(DOC_DIR)
 		$(OCAMLDOC) $(MLI)
 
-.SUFFIXES:	.ml .mli .cmo .cmi .cmx
+.SUFFIXES:	.ml .mli .cmo .cmi .cmx .class .template
+
+%.class:	%.java
+		cd java && javac -extdirs . $(subst java/,,$<)
+
+xtractorPath.ml:	xtractorPath.ml.template
+			sed "s\%%JAR_PATH%%\$(JAR_PATH)\g" $< > $@
 
 .ml.cmx:
-		sed "s\%%JAR_PATH%%\$(JAR_PATH)\g" $< > $<.tmp
-		mv $< $<.2 && mv $<.tmp $<
 		$(OCAMLOPT) -c $<
-		mv $<.2 $<
 
 .ml.cmo:
-		sed "s\%%JAR_PATH%%\$(JAR_PATH)\g" $< > $<.tmp
-		mv $< $<.2 && mv $<.tmp $<
 		$(OCAMLC) -c $<
-		mv $<.2 $<
 
 .mli.cmi:
-		sed "s\%%JAR_PATH%%\$(JAR_PATH)\g" $< > $<.tmp
-		mv $< $<.2 && mv $<.tmp $<
 		$(OCAMLC) -c $<
-		mv $<.2 $<
 
 clean:
 		@$(RM) *.cm[iox] *.o *.tmp
+		@$(RM) xtractorPath.ml
 		@$(RM) java/simplextractor/*.class
 		@$(RM) $(NAME) $(NAME).cma jar lib java/*.jar
 

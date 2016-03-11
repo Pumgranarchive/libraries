@@ -11,7 +11,7 @@ exception Stopped of int
 
 type document = { title: string; body: string; summary: string }
 
-let jar_path = ref ["jar/simplextractor.jar"; "%%JAR_PATH%%"]
+let jar_path = ref XtractorPath.SimpleXtractor.paths
 
 let set_jar_path path = jar_path := path :: !jar_path
 
@@ -68,13 +68,13 @@ let readlines name =
   loop []
 
 let basical_test () =
-  let uri = Uri.of_string "https://en.wikipedia.org/wiki/Music" in
-  let html = String.concat " " (readlines "bbc.html") in
-  (* let uri = Uri.of_string "http://www.random.com" in *)
-  (* let html = "<html><body><div>Hello World</div></body></html>" in *)
+  (* let uri = Uri.of_string "https://en.wikipedia.org/wiki/Music" in *)
+  (* let html = String.concat " " (readlines "bbc.html") in *)
+  let uri = Uri.of_string "http://www.random.com" in
+  let html = "<html><body><div>Hello World</div></body></html>" in
   print_endline "processing ...";
   lwt res = xtractor uri html in
   print_endline "done";
   Lwt.return (print res)
 
-lwt () = basical_test ()
+(* lwt () = basical_test () *)

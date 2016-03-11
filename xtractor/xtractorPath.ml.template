@@ -1,0 +1,11 @@
+(**
+   Xtractor Path
+   Manage lib path of simplextractor dependency
+*)
+
+module SimpleXtractor =
+struct
+
+  let paths = ["jar/simplextractor.jar"; "%%JAR_PATH%%"]
+
+end
