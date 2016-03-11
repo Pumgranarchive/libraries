@@ -27,13 +27,15 @@ public class simplextractor
 
         int length = 0;
         String content = "";
-        while (length < contentLength)
+        boolean finished = false;
+        while (!finished && length < contentLength)
         {
             try
             {
                 String line = bufferReader.readLine();
                 length += line.length() + 1;
                 content += line;
+                if (line.matches(".*</html>[ \t]*$")) finished = true;
             }
             catch (Throwable ex)
             {
