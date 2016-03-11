@@ -11,9 +11,16 @@ exception Stopped of int
 
 type document = { title: string; body: string; summary: string }
 
-let jar_path = ref "%%JAR_PATH%%"
+let jar_path = ref ["jar/simplextractor.jar"; "%%JAR_PATH%%"]
 
-let set_jar_path = (:=) jar_path
+let set_jar_path path = jar_path := path :: !jar_path
+
+let get_jar_path () =
+  try List.find Sys.file_exists !jar_path
+  with Not_found ->
+    print_endline "Error: Xtractor: library not found";
+    List.iter print_endline !jar_path;
+    raise Not_found
 
 let rec read lines channel =
   try_lwt
@@ -38,7 +45,8 @@ let format lines =
 let xtractor uri content =
   let str_uri = Uri.to_string uri in
   let contentLength = string_of_int (String.length content) in
-  let command = ("java", [| "java"; "-jar"; !jar_path; str_uri; contentLength |]) in
+  let jar_path = get_jar_path () in
+  let command = ("java", [| "java"; "-jar"; jar_path; str_uri; contentLength |]) in
   let process = Lwt_process.open_process command in
   lwt () = Lwt_io.write_line process#stdin content in
   lwt output = read [] process#stdout in
@@ -51,10 +59,22 @@ let print doc =
   print_endline ("body:   \t" ^ doc.body);
   print_endline ("summary:   \t" ^ doc.summary)
 
+let readlines name =
+  let ic = open_in name in
+  let rec loop lines =
+    try loop ((input_line ic) :: lines)
+    with End_of_file -> begin close_in ic; List.rev lines end
+  in
+  loop []
+
 let basical_test () =
-  let uri = Uri.of_string "http://www.random.com" in
-  let html = "<html><body><div>Hello World</div></body></html>" in
+  let uri = Uri.of_string "https://en.wikipedia.org/wiki/Music" in
+  let html = String.concat " " (readlines "bbc.html") in
+  (* let uri = Uri.of_string "http://www.random.com" in *)
+  (* let html = "<html><body><div>Hello World</div></body></html>" in *)
+  print_endline "processing ...";
   lwt res = xtractor uri html in
+  print_endline "done";
   Lwt.return (print res)
 
-(* lwt () = basical_test () *)
+lwt () = basical_test ()
