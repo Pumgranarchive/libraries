@@ -21,21 +21,20 @@ import de.jetwick.snacktory.SHelper;
 
 public class simplextractor
 {
-    private static InputStream readInput(int contentLength)
+    private static InputStream readInput()
     {
         BufferedReader bufferReader = new BufferedReader(new InputStreamReader(System.in));
 
-        int length = 0;
         String content = "";
         boolean finished = false;
-        while (!finished && length < contentLength)
+        while (!finished)
         {
             try
             {
                 String line = bufferReader.readLine();
-                length += line.length() + 1;
                 content += line;
-                if (line.matches(".*</html>[ \t]*$")) finished = true;
+                if (line.matches("^####&\\+=- PUMGRANA END -=\\+&####$"))
+                    finished = true;
             }
             catch (Throwable ex)
             {
@@ -55,8 +54,7 @@ public class simplextractor
 
             int summarySentenceNb = 1;
             String url = args[0];
-            int contentLength = Integer.parseInt(args[1]);
-            InputStream html = readInput(contentLength);
+            InputStream html = readInput();
             String charset = "UTF-8";
             ExtractorResult extracted = extractor.extract(html, charset, url);
             String summary = summarizer.summarize(extracted.getText(), summarySentenceNb);

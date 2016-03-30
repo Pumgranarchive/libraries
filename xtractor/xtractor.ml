@@ -9,6 +9,8 @@ exception Failed of int
 exception Killed of int
 exception Stopped of int
 
+let endDelimiter = "####&+=- PUMGRANA END -=+&####"
+
 type document = { title: string; body: string; summary: string }
 
 let jar_path = ref XtractorPath.SimpleXtractor.paths
@@ -44,11 +46,11 @@ let format lines =
 
 let xtractor uri content =
   let str_uri = Uri.to_string uri in
-  let contentLength = string_of_int (String.length content) in
   let jar_path = get_jar_path () in
-  let command = ("java", [| "java"; "-jar"; jar_path; str_uri; contentLength |]) in
+  let command = ("java", [| "java"; "-jar"; jar_path; str_uri |]) in
   let process = Lwt_process.open_process command in
   lwt () = Lwt_io.write_line process#stdin content in
+  lwt () = Lwt_io.write_line process#stdin endDelimiter in
   lwt output = read [] process#stdout in
   lwt status = process#close in
   let () = is_valid status in
