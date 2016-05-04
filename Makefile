@@ -3,14 +3,10 @@ DIRECTORIES :=	pghttp			\
 		pumgrana_tools		\
 		pumgrana_client_tools	\
 		pumgrana_http		\
-		readability_http	\
 		opencalais_http		\
 		freebase_youtube	\
 		dbpedia			\
 		xtractor
-
-#		boilerpipe		\
-
 
 DOC_DIR :=	doc/html
 
