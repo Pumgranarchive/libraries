@@ -22,9 +22,9 @@ let normalize_youtube_url url =
 
 (*** General Normalize ***)
 
-let rec read init channel =
-  try read ( (input_line channel) :: init ) channel
-  with End_of_file -> List.rev init
+let rec read lines channel =
+  try read ( (input_line channel) :: lines ) channel
+  with End_of_file -> List.rev lines
 
 let is_valid = function
   | Unix.WSIGNALED s -> raise (Killed s)
@@ -37,11 +37,11 @@ let python ?(imports=[]) cmds =
   let oneline = encoding ^ "\\n" ^ String.concat ";" (cmd_imports @ cmds) ^ ";" in
   let wrap_cmd = "echo \""^ oneline ^"\" | python" in
   try
-    let cin = Unix.open_process_in wrap_cmd in
-    let output = read [] cin in
-    let status = Unix.close_process_in cin in
+    let process = Unix.open_process_in wrap_cmd in
+    let output = read [] process in
+    let status = Unix.close_process_in process in
     begin is_valid status; output end
-  with _ -> []                          (* Catch process exception *)
+  with _ -> []
 
 let urlnorm urls =
   let imports = ["urlnorm"] in
