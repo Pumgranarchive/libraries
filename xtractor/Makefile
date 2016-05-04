@@ -36,7 +36,7 @@ java/org.json-20120521.jar:
 		mv org.json-20120521.jar java/.
 
 java/commons-io-2.4.jar:
-		wget "http://apache.websitebeheerjd.nl//commons/io/binaries/commons-io-2.4-bin.tar.gz"
+		wget "http://archive.apache.org/dist/commons/io/binaries/commons-io-2.4-bin.tar.gz"
 		tar -xf commons-io-2.4-bin.tar.gz
 		cp commons-io-2.4/commons-io-2.4.jar java/.
 		rm -rf commons-io-2.4 commons-io-2.4-bin.tar.gz
