@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "y" | sudo apt-get install xsltproc make cmake gcc g++
+sudo apt-get install -y xsltproc make cmake gcc g++
 
 export CMAKE_C_COMPILER=/usr/bin/gcc
 export CMAKE_CXX_COMPILER=/usr/bin/g++

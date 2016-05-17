@@ -10,7 +10,7 @@ if [ ! -d "lib/xtractor" ]; then
     cd lib/xtractor
     git checkout optimized
     sudo apt-cache search maven
-    sudo apt-get install maven
+    sudo apt-get install -y maven
     mvn clean install -Dmaven.compiler.source=$JAVA_VERSION -Dmaven.compiler.target=$JAVA_VERSION
 
 fi

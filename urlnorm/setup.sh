@@ -1,4 +1,4 @@
 #!/bin/bash
 
-sudo apt-get install python-pip
+sudo apt-get install -y python-pip
 sudo pip install urlnorm
