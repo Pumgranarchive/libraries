@@ -1,4 +1,4 @@
 #!/bin/bash
 
-sudo apt-get install -y python-pip
-sudo pip install urlnorm
+sudo apt-get install -y python-pip libzmq3-dev
+sudo pip install urlnorm zmq
